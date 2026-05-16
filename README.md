@@ -126,8 +126,6 @@ Production-RAG-AI-Assistant-with-Reranking-and-Evaluation-Pipeline/
 └── README.md
 ```
 
-Note: `rag/` and `rag-pipeline/Lib`, `rag-pipeline/Scripts`, and related venv files are local environment artifacts and should not be pushed.
-
 ---
 
 # Project Status
