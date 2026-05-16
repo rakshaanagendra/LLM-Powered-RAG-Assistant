@@ -80,20 +80,49 @@ Dense retrieval uses semantic embeddings to retrieve contextually similar docume
 # Repository Structure
 
 ```text
-project/
-│
-├── data/                  # Raw and processed knowledge files
-├── embeddings/            # Embedding generation and vector indexing
-├── retrieval/             # Dense, sparse, hybrid retrieval and RRF logic
-├── reranking/             # Cross-Encoder reranking pipelines
-├── evaluation/            # Validation, confidence scoring and evaluation workflows
-├── generation/            # Prompt construction and grounded generation
-├── validation/            # Semantic validation and hallucination mitigation
-├── app/                   # Application/API layer
-├── notebooks/             # Experimental notebooks and testing
+Production-RAG-AI-Assistant-with-Reranking-and-Evaluation-Pipeline/
+├── app/
+├── data/
+│   ├── pdfs/
+│   ├── processed/
+│   ├── queries/
+│   │   └── eval_queries.json
+│   └── raw/
+├── evaluation/
+│   └── evaluator.py
+├── rag-pipeline/
+│   ├── evaluation/
+│   │   ├── llm_validator.py
+│   │   ├── semantic_validator.py
+│   │   └── validator.py
+│   ├── generation/
+│   │   └── generator.py
+│   ├── ingestion/
+│   │   ├── chunker.py
+│   │   ├── embedder.py
+│   │   └── loader.py
+│   ├── pipeline/
+│   │   └── pipeline.py
+│   └── retrieval/
+│       ├── multi_query_hybrid.py
+│       ├── multi_query_retriever.py
+│       ├── query_rewriter.py
+│       ├── reranker.py
+│       ├── retriever.py
+│       └── sparse_retriever.py
+├── scripts/
+│   └── ingest.py
+├── tests/
+├── vectorstore/
+│   └── faiss_indexer.py
+├── main.py
+├── pyrightconfig.json
 ├── requirements.txt
+├── .gitignore
 └── README.md
 ```
+
+Note: `rag/` and `rag-pipeline/Lib`, `rag-pipeline/Scripts`, and related venv files are local environment artifacts and should not be pushed.
 
 ---
 
