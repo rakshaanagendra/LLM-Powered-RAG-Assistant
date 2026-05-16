@@ -1,3 +1,5 @@
+#### LLM-Powered RAG Assistant
+
 # Quick Start
 
 ## Clone Repository
