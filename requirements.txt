@@ -1,0 +1,56 @@
+# Core LLM
+transformers
+torch
+accelerate
+
+# Embeddings / CrossEncoder
+sentence-transformers
+
+# Vector DB
+faiss-cpu
+
+# LangChain ecosystem
+langchain
+langchain-community
+langchain-core
+langchain-text-splitters
+
+# Datasets 
+datasets
+
+# RAG evaluation
+ragas
+
+# API (deployment later)
+fastapi
+uvicorn
+
+# Experiment tracking
+mlflow
+
+# Data handling
+pandas
+numpy
+
+# Utilities
+tqdm
+python-dotenv
+unstructured
+pypdf
+pymupdf
+
+# Tokenization
+tiktoken
+
+# Async / performance
+aiohttp
+
+# Optional dev tools
+notebook
+ipykernel
+
+# LLM
+ollama
+
+tf-keras
+rank_bm25

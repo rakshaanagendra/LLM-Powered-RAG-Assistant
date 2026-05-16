@@ -1,0 +1,66 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual Environment
+venv/
+.env/
+.venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment Variables
+.env
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# ML / Model Files
+models/
+checkpoints/
+*.pt
+*.pth
+*.bin
+
+# Vector Databases
+faiss_index/
+vectorstore/
+
+# Data Files
+data/raw/
+data/processed/
+
+# Cache
+.cache/
+
+# Ollama
+ollama.log
+
+# Evaluation Outputs
+evaluation_outputs/
+
+# Temporary Files
+temp/
+tmp/
+
+# Coverage
+.coverage
+htmlcov/
+
+# Build
+dist/
+build/
+
+# Streamlit
+.streamlit/secrets.toml

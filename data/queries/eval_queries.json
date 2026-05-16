@@ -1,0 +1,120 @@
+[
+  {
+    "question": "Explain the core idea behind Retrieval-Augmented Generation.",
+    "expected_doc": "original_rag"
+  },
+  {
+    "question": "What problem does RAG solve in large language models?",
+    "expected_doc": "original_rag"
+  },
+  {
+    "question": "How does retrieval improve factual accuracy in LLMs?",
+    "expected_doc": "original_rag"
+  },
+  {
+    "question": "What is the role of external knowledge in RAG systems?",
+    "expected_doc": "original_rag"
+  },
+
+  {
+    "question": "What is FAISS and why is it used in vector search?",
+    "expected_doc": "faiss_library"
+  },
+  {
+    "question": "How does FAISS enable efficient similarity search?",
+    "expected_doc": "faiss_library"
+  },
+  {
+    "question": "What are the advantages of approximate nearest neighbor search?",
+    "expected_doc": "faiss_library"
+  },
+  {
+    "question": "Why is vector indexing important in large-scale retrieval systems?",
+    "expected_doc": "faiss_library"
+  },
+
+  {
+    "question": "What is a CrossEncoder and how does it work?",
+    "expected_doc": "crossencoder"
+  },
+  {
+    "question": "Why are CrossEncoders more accurate than bi-encoders?",
+    "expected_doc": "crossencoder"
+  },
+  {
+    "question": "When should CrossEncoders be used in a RAG pipeline?",
+    "expected_doc": "crossencoder"
+  },
+  {
+    "question": "What is reranking and how do CrossEncoders help?",
+    "expected_doc": "crossencoder"
+  },
+
+  {
+    "question": "What is hybrid search in information retrieval?",
+    "expected_doc": "hybrid_Search"
+  },
+  {
+    "question": "Why combine keyword search with vector search?",
+    "expected_doc": "hybrid_Search"
+  },
+  {
+    "question": "What are the benefits of hybrid retrieval methods?",
+    "expected_doc": "hybrid_Search"
+  },
+  {
+    "question": "How does hybrid search improve recall and precision?",
+    "expected_doc": "hybrid_Search"
+  },
+
+  {
+    "question": "What is RAGAS and how is it used for evaluation?",
+    "expected_doc": "ragas"
+  },
+  {
+    "question": "What metrics does RAGAS provide for RAG systems?",
+    "expected_doc": "ragas"
+  },
+  {
+    "question": "How do you evaluate answer faithfulness in RAG?",
+    "expected_doc": "ragas"
+  },
+  {
+    "question": "Why is automated evaluation important for RAG pipelines?",
+    "expected_doc": "ragas"
+  },
+
+  {
+    "question": "What is the lost-in-the-middle problem in LLMs?",
+    "expected_doc": "lostinthemiddle"
+  },
+  {
+    "question": "Why do LLMs struggle with long context windows?",
+    "expected_doc": "lostinthemiddle"
+  },
+  {
+    "question": "How does context position affect model performance?",
+    "expected_doc": "lostinthemiddle"
+  },
+  {
+    "question": "What are solutions to long-context degradation in LLMs?",
+    "expected_doc": "lostinthemiddle"
+  },
+
+  {
+    "question": "What are embeddings in LangChain?",
+    "expected_doc": "langchain_rag_embedding"
+  },
+  {
+    "question": "How does text splitting affect retrieval performance?",
+    "expected_doc": "langchain_rag_text_splitter"
+  },
+  {
+    "question": "What is the role of retrievers in LangChain?",
+    "expected_doc": "langchain_retrievers"
+  },
+  {
+    "question": "How do you evaluate a LangChain RAG pipeline?",
+    "expected_doc": "langchain_rag_evaluation"
+  }
+]

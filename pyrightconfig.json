@@ -1,0 +1,13 @@
+{
+  "venvPath": ".",
+  "venv": "rag",
+  "pythonVersion": "3.13",
+  "executionEnvironments": [
+    {
+      "root": ".",
+      "extraPaths": [
+        "rag/Lib/site-packages"
+      ]
+    }
+  ]
+}
