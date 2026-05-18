@@ -5,10 +5,13 @@ import re
 from typing import Optional
 from pathlib import Path
 
-# Allow running this file directly: `python rag/retrieval/retriever.py`
-PIPELINE_ROOT = Path(__file__).resolve().parents[1]
-if str(PIPELINE_ROOT) not in sys.path:
-    sys.path.insert(0, str(PIPELINE_ROOT))
+# Allow running this file directly from the retrieval folder.
+REPO_ROOT = Path(__file__).resolve().parents[2]
+PIPELINE_ROOT = REPO_ROOT / "rag-pipeline"
+
+for path in (str(REPO_ROOT), str(PIPELINE_ROOT)):
+    if path not in sys.path:
+        sys.path.insert(0, path)
 
 from vectorstore.faiss_indexer import load_index
 from ingestion.embedder import embed_chunks
@@ -115,7 +118,7 @@ class Retriever:
 
         rewritten_query = rewriter.rewrite(query)
 
-        hybrid_original = self.hybrid_search(
+        original_out = self.hybrid_search_with_diagnostics(
             query,
             retrieve_k=retrieve_k,
             final_k=final_k,
@@ -128,7 +131,7 @@ class Retriever:
             max_per_source=max_per_source,
         )
 
-        hybrid_rewritten = self.hybrid_search(
+        rewritten_out = self.hybrid_search_with_diagnostics(
             rewritten_query,
             retrieve_k=retrieve_k,
             final_k=final_k,
@@ -144,8 +147,8 @@ class Retriever:
         return {
             "original_query": query,
             "rewritten_query": rewritten_query,
-            "hybrid_original": hybrid_original,
-            "hybrid_rewritten": hybrid_rewritten,
+            "hybrid_original": original_out,
+            "hybrid_rewritten": rewritten_out,
         }
     
     def _is_weak_candidate(self, chunk):
@@ -187,6 +190,59 @@ class Retriever:
 
         return filtered
     
+    #RETRIEVAL DIAGNOSTICS
+    def _build_retrieval_diagnostics(
+        self,
+        query,
+        expanded_queries,
+        dense_results,
+        sparse_results,
+        final_results,
+    ):
+        diagnostics = {
+            "query": query,
+            "expanded_queries": expanded_queries,
+
+            "dense_retrieval": {
+                "count": len(dense_results),
+                "sources": list(set(
+                    chunk.get("source", "unknown")
+                    for chunk in dense_results
+                )),
+                "top_scores": [
+                    round(chunk.get("cosine_score", 0.0), 4)
+                    for chunk in dense_results[:5]
+                ],
+            },
+
+            "sparse_retrieval": {
+                "count": len(sparse_results),
+                "sources": list(set(
+                    chunk.get("source", "unknown")
+                    for chunk in sparse_results
+                )),
+                "top_scores": [
+                    round(chunk.get("bm25_score", 0.0), 4)
+                    for chunk in sparse_results[:5]
+                ],
+            },
+
+            "final_results": {
+                "count": len(final_results),
+                "sources": list(set(
+                    chunk.get("source", "unknown")
+                    for chunk in final_results
+                )),
+                "top_rrf_scores": [
+                    round(chunk.get("rrf_score", 0.0), 6)
+                    for chunk in final_results[:5]
+                ],
+            },
+        }
+
+        return diagnostics
+
+
     def search(self, query, top_k=13, max_per_source: Optional[int] = 2, min_similarity=0.15):
         query_embedding = embed_chunks([{"text": query}])
         query_embedding = np.array(query_embedding).astype("float32")
@@ -331,6 +387,136 @@ class Retriever:
 
         return balanced
 
+    def hybrid_search_with_diagnostics(
+        self,
+        query,
+        retrieve_k=80,
+        final_k=30,
+        k=60,
+        dense_weight=0.5,
+        sparse_weight=0.5,
+        adaptive_weights=False,
+        min_dense_similarity=0.15,
+        min_bm25_score=0.0,
+        max_per_source: Optional[int] = 3,
+    ):
+        queries = [query, QueryRewriter().rewrite(query)]
+        dense_weight, sparse_weight = _infer_weights(
+            query,
+            dense_weight,
+            sparse_weight,
+            adaptive_weights=adaptive_weights,
+        )
+
+        all_dense = []
+        all_sparse = []
+
+        for q in queries:
+            all_dense.extend(
+                self.search(
+                    q,
+                    top_k=retrieve_k,
+                    max_per_source=max_per_source,
+                    min_similarity=min_dense_similarity,
+                )
+            )
+            all_sparse.extend(
+                self.sparse.search(q, top_k=retrieve_k, min_score=min_bm25_score)
+            )
+
+        def _dedupe_by_text(chunks):
+            seen = set()
+            unique = []
+            for chunk in chunks:
+                key = chunk["text"]
+                if key not in seen:
+                    unique.append(chunk)
+                    seen.add(key)
+            return unique
+
+        all_dense = _dedupe_by_text(all_dense)
+        all_sparse = _dedupe_by_text(all_sparse)
+
+        all_dense = self._filter_candidates(all_dense, max_per_source=max_per_source)
+        all_sparse = self._filter_candidates(all_sparse, max_per_source=max_per_source)
+
+        scores = {}
+
+        for rank, chunk in enumerate(all_dense):
+            key = chunk["text"]
+            scores[key] = scores.get(key, 0) + dense_weight * (1 / (k + rank + 1))
+
+        for rank, chunk in enumerate(all_sparse):
+            key = chunk["text"]
+            scores[key] = scores.get(key, 0) + sparse_weight * (1 / (k + rank + 1))
+
+        combined = {}
+
+        for chunk in all_dense:
+            key = chunk["text"]
+            combined[key] = chunk.copy()
+
+        for chunk in all_sparse:
+            key = chunk["text"]
+            if key not in combined:
+                combined[key] = chunk.copy()
+
+        for key in combined:
+            combined[key]["rrf_score"] = scores.get(key, 0)
+
+        final = sorted(combined.values(), key=lambda x: x["rrf_score"], reverse=True)
+
+        source_limit = max_per_source if max_per_source is not None else final_k
+        balanced = []
+        per_source_counts = {}
+        for chunk in final:
+            source = chunk.get("source", "unknown")
+            count = per_source_counts.get(source, 0)
+            if count >= source_limit:
+                continue
+            per_source_counts[source] = count + 1
+            balanced.append(chunk)
+            if len(balanced) >= final_k:
+                break
+
+        diagnostics = self._build_retrieval_diagnostics(
+            query=query,
+            expanded_queries=queries,
+            dense_results=all_dense,
+            sparse_results=all_sparse,
+            final_results=balanced,
+        )
+
+        return {
+            "results": balanced,
+            "diagnostics": diagnostics,
+        }
+
+
+def print_diagnostics(label, diag):
+    print(f"\n================ DIAGNOSTICS ({label}) ================\n")
+    print(f"Query: {diag['query']}")
+
+    print("\nExpanded queries:")
+    for i, q in enumerate(diag["expanded_queries"], start=1):
+        print(f"  [{i}] {q}")
+
+    print("\nDense retrieval:")
+    print(f"  Count: {diag['dense_retrieval']['count']}")
+    print(f"  Sources: {', '.join(diag['dense_retrieval']['sources'])}")
+    print(f"  Top scores: {diag['dense_retrieval']['top_scores']}")
+
+    print("\nSparse retrieval:")
+    print(f"  Count: {diag['sparse_retrieval']['count']}")
+    print(f"  Sources: {', '.join(diag['sparse_retrieval']['sources'])}")
+    print(f"  Top scores: {diag['sparse_retrieval']['top_scores']}")
+
+    print("\nFinal results:")
+    print(f"  Count: {diag['final_results']['count']}")
+    print(f"  Sources: {', '.join(diag['final_results']['sources'])}")
+    print(f"  Top RRF scores: {diag['final_results']['top_rrf_scores']}")
+
+
 if __name__ == "__main__":
     # parser = argparse.ArgumentParser(description="Test dense/hybrid retriever with a query.")
     # parser.add_argument("query", nargs="?", default="What is dense retrieval?", help="Query text")
@@ -449,14 +635,19 @@ if __name__ == "__main__":
     print("\n================ REWRITTEN QUERY ================\n")
     print(output["rewritten_query"])
 
+    print_diagnostics("ORIGINAL", output["hybrid_original"]["diagnostics"])
+    print_diagnostics("REWRITTEN", output["hybrid_rewritten"]["diagnostics"])
+
     print("\n================ HYBRID RESULTS (ORIGINAL) ================\n")
-    for i, c in enumerate(output["hybrid_original"], start=1):
-        print(f"[{i}] source={c['source']}")
-        print(c["text"][:300])
+    original_results = output["hybrid_original"]["results"]
+    for i, c in enumerate(original_results, start=1):
+        print(f"[{i}] source={c.get('source', 'unknown')}")
+        print(c.get("text", "")[:300])
         print("-" * 80)
 
     print("\n================ HYBRID RESULTS (REWRITTEN) ================\n")
-    for i, c in enumerate(output["hybrid_rewritten"], start=1):
-        print(f"[{i}] source={c['source']}")
-        print(c["text"][:300])
+    rewritten_results = output["hybrid_rewritten"]["results"]
+    for i, c in enumerate(rewritten_results, start=1):
+        print(f"[{i}] source={c.get('source', 'unknown')}")
+        print(c.get("text", "")[:300])
         print("-" * 80)
