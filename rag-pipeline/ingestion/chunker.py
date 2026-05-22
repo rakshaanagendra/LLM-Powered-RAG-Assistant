@@ -1,3 +1,5 @@
+from pydoc import doc
+
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 import os
 import sys
@@ -69,11 +71,8 @@ def chunk_documents(documents):
                 "length": len(chunk),
             }
 
-            if "page" in doc:
-                chunk_data["page"] = doc["page"]
-
-            if "title" in doc:
-                chunk_data["title"] = doc["title"]
+            chunk_data["page"] = doc.get("page")
+            chunk_data["title"] = doc.get("title")
 
             chunks.append(chunk_data)
             chunk_id += 1
