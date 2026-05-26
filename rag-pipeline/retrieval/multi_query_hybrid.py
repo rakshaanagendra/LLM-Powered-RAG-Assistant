@@ -792,7 +792,216 @@ class MultiQueryHybridRetriever:
             "diagnostics": diagnostics,
         }
 
-        
+    def _choose_retry_policy(
+        self,
+        health: Dict[str, Any],
+        num_queries: int,
+        retrieve_k: int,
+        final_k: int,
+        dense_weight: float,
+        sparse_weight: float,
+        max_per_source: Optional[int],
+    ) -> Dict[str, Any]:
+        """
+        Map retrieval-health reasons to a retry strategy.
+        """
+        reasons = [r.lower() for r in health.get("reasons", [])]
+        reasons_text = " | ".join(reasons)
+        decision_trace=[]
+
+        # Start with the current settings
+        policy = {
+            "num_queries": num_queries,
+            "retrieve_k": retrieve_k,
+            "final_k": final_k,
+            "dense_weight": dense_weight,
+            "sparse_weight": sparse_weight,
+            "max_per_source": max_per_source,
+        }
+
+        # 1) Weak lexical overlap -> favor sparse retrieval a bit more
+        if "lexical overlap is weak" in reasons_text:
+            policy["num_queries"] = min(num_queries + 1, 6)
+            policy["retrieve_k"] = max(policy["retrieve_k"], int(retrieve_k * 1.25))
+            policy["final_k"] = max(policy["final_k"], int(final_k * 1.25))
+            policy["dense_weight"] = 0.35
+            policy["sparse_weight"] = 0.65
+            decision_trace.append(
+                {
+                    "reason": "Weak lexical overlap",
+                    "actions": [
+                        "Boosted sparse retrieval weighting",
+                        "Expanded retrieve_k",
+                        "Expanded final_k",
+                        "Increased query expansion",
+                    ],
+                }
+            )
+        # 2) High duplicate rate -> diversify more
+        if "duplicate rate is high" in reasons_text:
+            if policy["max_per_source"] is not None:
+                policy["max_per_source"] = max(1, policy["max_per_source"] - 1)
+
+            policy["retrieve_k"] = max(policy["retrieve_k"], int(retrieve_k * 1.25))
+            decision_trace.append(
+                {
+                    "reason": "High duplicate rate",
+                    "actions": [
+                        "Reduced max_per_source",
+                        "Expanded retrieve_k",
+                    ],
+                }
+            )
+            
+        # 3) Low source diversity -> broaden search
+        if "source diversity is low" in reasons_text:
+            policy["num_queries"] = min(policy["num_queries"] + 1, 6)
+            policy["retrieve_k"] = max(policy["retrieve_k"], int(retrieve_k * 1.40))
+            policy["final_k"] = max(policy["final_k"], int(final_k * 1.20))
+            decision_trace.append(
+                {
+                    "reason": "Low source diversity",
+                    "actions": [
+                        "Expanded query generation",
+                        "Broadened retrieval pool",
+                    ],
+                }
+            )
+        # 4) Low rerank quality -> search wider
+        if (
+            "average rerank score is low" in reasons_text
+            or "top rerank score is weak" in reasons_text
+        ):
+            policy["num_queries"] = min(policy["num_queries"] + 1, 6)
+            policy["retrieve_k"] = max(policy["retrieve_k"], int(retrieve_k * 1.50))
+            policy["final_k"] = max(policy["final_k"], int(final_k * 1.50))
+            decision_trace.append(
+                {
+                    "reason": "Weak rerank quality",
+                    "actions": [
+                        "Aggressively expanded retrieve_k",
+                        "Expanded final_k",
+                        "Increased query expansion",
+                    ],
+                }
+            )
+
+        return {
+            "policy": policy,
+            "decision_trace": decision_trace,
+        }
+
+    # Adaptive retrieval controller with retry logic based on diagnostics
+    def adaptive_search_with_retry(
+        self,
+        query,
+        num_queries=4,
+        retrieve_k=60,
+        final_k=20,
+        k=60,
+        dense_weight=0.5,
+        sparse_weight=0.5,
+        adaptive_weights=False,
+        min_dense_similarity=0.15,
+        min_bm25_score=0.0,
+        max_per_source: Optional[int] = 3,
+        context_top_k: int = 5,
+        include_scores: bool = True,
+    ):
+        """
+        Adaptive retrieval controller.
+
+        Step 1:
+            Run normal retrieval + diagnostics.
+
+        Step 2:
+            Inspect retrieval health.
+
+        Step 3:
+            If retrieval is weak, retry with a reason-aware strategy.
+
+        Returns:
+            {
+                "used_retry": bool,
+                "retry_params": {...} | None,
+                "initial_result": ...,
+                "final_result": ...
+            }
+        """
+
+        initial_result = self.search_with_diagnostics(
+            query=query,
+            num_queries=num_queries,
+            retrieve_k=retrieve_k,
+            final_k=final_k,
+            k=k,
+            dense_weight=dense_weight,
+            sparse_weight=sparse_weight,
+            adaptive_weights=adaptive_weights,
+            min_dense_similarity=min_dense_similarity,
+            min_bm25_score=min_bm25_score,
+            max_per_source=max_per_source,
+            context_top_k=context_top_k,
+            include_scores=include_scores,
+        )
+
+        initial_health = initial_result["diagnostics"].get("retrieval_health", {})
+        is_weak = initial_health.get("is_weak", False)
+
+        # If not weak, no retry.
+        if not is_weak:
+            return {
+                "used_retry": False,
+                "retry_params": None,
+                "initial_result": initial_result,
+                "final_result": initial_result,
+            }
+
+        # Weak retrieval -- choose a retry policy based on the reasons
+        retry_decision = self._choose_retry_policy(
+            health=initial_health,
+            num_queries=num_queries,
+            retrieve_k=retrieve_k,
+            final_k=final_k,
+            dense_weight=dense_weight,
+            sparse_weight=sparse_weight,
+            max_per_source=max_per_source,
+        )
+
+        retry_policy = retry_decision["policy"]
+        decision_trace = retry_decision["decision_trace"]
+
+        retry_result = self.search_with_diagnostics(
+            query=query,
+            num_queries=retry_policy["num_queries"],
+            retrieve_k=retry_policy["retrieve_k"],
+            final_k=retry_policy["final_k"],
+            k=k,
+            dense_weight=retry_policy["dense_weight"],
+            sparse_weight=retry_policy["sparse_weight"],
+            adaptive_weights=adaptive_weights,
+            min_dense_similarity=min_dense_similarity,
+            min_bm25_score=min_bm25_score,
+            max_per_source=retry_policy["max_per_source"],
+            context_top_k=context_top_k,
+            include_scores=include_scores,
+        )
+
+        return {
+            "used_retry": True,
+            "decision_trace": decision_trace,
+            "retry_params": {
+                "num_queries": retry_policy["num_queries"],
+                "retrieve_k": retry_policy["retrieve_k"],
+                "final_k": retry_policy["final_k"],
+                "dense_weight": retry_policy["dense_weight"],
+                "sparse_weight": retry_policy["sparse_weight"],
+                "max_per_source": retry_policy["max_per_source"],
+            },
+            "initial_result": initial_result,
+            "final_result": retry_result,
+        }
+      
 
     def print_diagnostics(self, diag):
         print("\n==================================================")
@@ -974,6 +1183,124 @@ class MultiQueryHybridRetriever:
         # for source, count in context["source_distribution"].items():
         #     print(f"  {source}: {count}")
 
+
+    def print_adaptive_result(self, adaptive_result):
+        """
+        Pretty-print adaptive retrieval results.
+        """
+
+        initial_health = adaptive_result["initial_result"]["diagnostics"].get(
+            "retrieval_health", {}
+        )
+        final_health = adaptive_result["final_result"]["diagnostics"].get(
+            "retrieval_health", {}
+        )
+
+        print("\n==================================================")
+        print("ADAPTIVE RETRIEVAL")
+        print("==================================================")
+        print(f"Used retry: {adaptive_result['used_retry']}")
+
+        if adaptive_result["retry_params"] is not None:
+            print("Retry params:")
+            for key, value in adaptive_result["retry_params"].items():
+                print(f"  {key}: {value}")
+
+            decision_trace = adaptive_result.get("decision_trace", [])
+
+            if decision_trace:
+                print("\nRETRY DECISION TRACE")
+
+                for i, step in enumerate(decision_trace, start=1):
+                    print(f"\n[{i}] {step['reason']}")
+
+                    for action in step["actions"]:
+                        print(f"    ->{action}")
+
+        print("\nINITIAL HEALTH")
+        print(f"  Severity: {initial_health.get('severity', 'unknown')}")
+        print(f"  Risk score: {initial_health.get('risk_score', 0.0)}")
+        print(f"  Is weak: {initial_health.get('is_weak', False)}")
+
+        reasons = initial_health.get("reasons", [])
+        if reasons:
+            print("  Reasons:")
+            for reason in reasons:
+                print(f"    - {reason}")
+
+        print("\nFINAL HEALTH")
+        print(f"  Severity: {final_health.get('severity', 'unknown')}")
+        print(f"  Risk score: {final_health.get('risk_score', 0.0)}")
+        print(f"  Is weak: {final_health.get('is_weak', False)}")
+
+        reasons = final_health.get("reasons", [])
+        if reasons:
+            print("  Reasons:")
+            for reason in reasons:
+                print(f"    - {reason}")
+
+        print("\nFINAL TOP RESULTS")
+        for i, c in enumerate(adaptive_result["final_result"]["reranked_chunks"][:5], start=1):
+            source = c.get("source", "unknown")
+            rerank_score = c.get("rerank_score", 0.0)
+            rrf_score = c.get("multi_query_rrf_score", 0.0)
+            print(f"  [{i}] {source} | rerank={rerank_score:.4f} | rrf={rrf_score:.4f}")
+
+        # print("\n==================================================")
+        # print("ADAPTIVE RETRIEVAL")
+        # print("==================================================")
+
+        # print(f"Used retry: {adaptive_result['used_retry']}")
+
+        # if adaptive_result["retry_params"] is not None:
+        #     print("\nRetry params:")
+        #     for key, value in adaptive_result["retry_params"].items():
+        #         print(f"  {key}: {value}")
+
+        # print("\n==================================================")
+        # print("INITIAL RETRIEVAL DIAGNOSTICS")
+        # print("==================================================")
+
+        # self.print_diagnostics(
+        #     adaptive_result["initial_result"]["diagnostics"]
+        # )
+
+        # print("\n==================================================")
+        # print("FINAL RETRIEVAL DIAGNOSTICS")
+        # print("==================================================")
+
+        # self.print_diagnostics(
+        #     adaptive_result["final_result"]["diagnostics"]
+        # )
+
+        # print("\n==================================================")
+        # print("FINAL RERANKED RESULTS")
+        # print("==================================================")
+
+        # for i, c in enumerate(
+        #     adaptive_result["final_result"]["reranked_chunks"],
+        #     start=1,
+        # ):
+        #     print(f"\n[{i}] source={c.get('source', 'unknown')}")
+
+        #     if "rerank_score" in c:
+        #         print(f"rerank_score={c['rerank_score']:.4f}")
+
+        #     if "multi_query_rrf_score" in c:
+        #         print(
+        #             f"multi_query_rrf_score="
+        #             f"{c['multi_query_rrf_score']:.4f}"
+        #         )
+
+        #     print(c.get("text", "")[:300])
+        #     print("-" * 80)
+
+        # print("\n==================================================")
+        # print("PROMPT-READY CONTEXT")
+        # print("==================================================")
+
+        # print(adaptive_result["final_result"]["context"])
+
 ## Basic test cases for MultiQueryHybridRetriever
 # if __name__ == "__main__":
 #     multi_query_retriever = MultiQueryHybridRetriever()
@@ -1026,12 +1353,20 @@ class MultiQueryHybridRetriever:
 if __name__ == "__main__":
     multi_query_retriever = MultiQueryHybridRetriever()
 
-    test_queries = [
-        "What is dense and sparse retrieval?",
-        "that thing where llms forget the middle part",
-        "how do vector databases work",
-        "bm25 vs embeddings",
-    ]
+    # test_queries = [
+    #     "What is dense and sparse retrieval?",
+    #     "that thing where llms forget the middle part",
+    #     "how do vector databases work",
+    #     "bm25 vs embeddings",
+    # ]
+
+    # For adaptive search testing, use queries that are more likely to trigger reason-aware retrieval
+    test_queries = [ 
+        "that issue where transformers ignore middle context", 
+        "bm25 retrieval embeddings hybrid search reranking", 
+        "lost in the middle attention problem", 
+        "fix my wifi router",
+        "what is dense and sparse retrieval?" ]
 
     for query in test_queries:
         print("\n==================================================")
@@ -1048,7 +1383,16 @@ if __name__ == "__main__":
         for i, q in enumerate(expanded_queries, start=1):
             print(f"[{i}] {q}")
 
-        result = multi_query_retriever.search_with_diagnostics(
+        # result = multi_query_retriever.search_with_diagnostics(
+        #     query,
+        #     num_queries=4,
+        #     retrieve_k=40,
+        #     final_k=10,
+        #     context_top_k=5,
+        # )
+
+        # For demonstration, we'll call the adaptive search which includes diagnostics and potential retry logic
+        result = multi_query_retriever.adaptive_search_with_retry(
             query,
             num_queries=4,
             retrieve_k=40,
@@ -1056,27 +1400,30 @@ if __name__ == "__main__":
             context_top_k=5,
         )
 
-        multi_query_retriever.print_diagnostics(result["diagnostics"])
+        multi_query_retriever.print_adaptive_result(result)
 
-        print("\n==================================================")
-        print("FINAL RERANKED RESULTS")
-        print("==================================================")
+        # final_result = result["final_result"]
 
-        for i, c in enumerate(result["reranked_chunks"], start=1):
-            print(f"\n[{i}] source={c.get('source', 'unknown')}")
 
-            if "rerank_score" in c:
-                print(f"rerank_score={c['rerank_score']:.4f}")
+        # print("\n==================================================")
+        # print("FINAL RERANKED RESULTS")
+        # print("==================================================")
 
-            if "multi_query_rrf_score" in c:
-                print(f"multi_query_rrf_score={c['multi_query_rrf_score']:.4f}")
+        # for i, c in enumerate(final_result["reranked_chunks"], start=1):
+        #     print(f"\n[{i}] source={c.get('source', 'unknown')}")
 
-            print(c.get("text", "")[:300])
+        #     if "rerank_score" in c:
+        #         print(f"rerank_score={c['rerank_score']:.4f}")
 
-            print("-" * 80)
+        #     if "multi_query_rrf_score" in c:
+        #         print(f"multi_query_rrf_score={c['multi_query_rrf_score']:.4f}")
 
-        print("\n==================================================")
-        print("PROMPT-READY CONTEXT")
-        print("==================================================")
+        #     print(c.get("text", "")[:300])
 
-        print(result["context"])
+        #     print("-" * 80)
+
+        # print("\n==================================================")
+        # print("PROMPT-READY CONTEXT")
+        # print("==================================================")
+
+        # print(final_result["context"])
