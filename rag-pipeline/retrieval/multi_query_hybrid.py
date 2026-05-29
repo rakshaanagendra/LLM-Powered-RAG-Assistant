@@ -215,6 +215,73 @@ class MultiQueryHybridRetriever:
             },
         }
 
+
+    # For specific technical queries, we may want a more targeted confidence measure that focuses on relevance signals rather than diversity or duplication, since for some questions it's more important to find the right piece of evidence even if it's from the same source.
+    # So, a practical rule would be to separate relevance score and diversity score so that a low diversity score does not overpower a strong match
+    # For relevance - top rerank score, average rerank score, score gap and lexical overlap
+    # For diversity - duplicate rate, source diversity, dominant source ratio, top3 source concentration
+    def _compute_relevance_confidence(self, diagnostics: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Measures how relevant the retrieved chunks look.
+        This should answer: 'Did I find the right stuff?'
+        """
+        rerank_scores = diagnostics.get("rerank_scores", [])
+        lexical_overlap = diagnostics.get("avg_lexical_overlap", 0.0)
+
+        if not rerank_scores:
+            return {
+                "score": 0.0,
+                "label": "weak",
+                "reason": "No rerank scores available.",
+            }
+
+        avg_score = sum(rerank_scores) / len(rerank_scores)
+        top_score = max(rerank_scores)
+
+        # Simple relevance score: emphasize top rerank score + average score + lexical overlap
+        score = (
+            0.45 * top_score +
+            0.35 * avg_score +
+            0.20 * lexical_overlap
+        )
+
+        if score >= 0.75:
+            label = "strong"
+        elif score >= 0.45:
+            label = "medium"
+        else:
+            label = "weak"
+
+        return {
+            "score": round(min(score, 1.0), 3),
+            "label": label,
+            "reason": "Based on rerank quality and lexical match.",
+        }
+
+    def _compute_diversity_confidence(self, diagnostics: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Measures how diverse and non-redundant the retrieval result is.
+        This should answer: 'Is the evidence varied enough?'
+        """
+        duplicate_rate = diagnostics.get("duplicate_stats", {}).get("duplicate_rate", 0.0)
+        source_diversity = diagnostics.get("source_diversity", {}).get("reranked", {}).get("dominant_ratio", 1.0)
+
+        # Lower duplicate rate and lower dominant ratio are better
+        diversity_score = 1.0 - (0.6 * duplicate_rate + 0.4 * source_diversity)
+
+        if diversity_score >= 0.75:
+            label = "strong"
+        elif diversity_score >= 0.45:
+            label = "medium"
+        else:
+            label = "weak"
+
+        return {
+            "score": round(max(min(diversity_score, 1.0), 0.0), 3),
+            "label": label,
+            "reason": "Based on duplicate rate and source concentration.",
+        }
+
     def build_context(
         self,
         chunks: List[Dict[str, Any]],
@@ -257,6 +324,175 @@ class MultiQueryHybridRetriever:
         return "\n\n" + ("\n\n" + ("-" * 80) + "\n\n").join(context_parts) if context_parts else ""
 
 
+    # Retrieval selection strategy - not every query needs to go through the same retrieval process
+    # Some queries can be semantically stronger, some maybe keyword heavy and the rest may be more ambigous requiring metadata and/or hybrid retrieval
+    def _select_retrieval_strategy(
+        self,
+        query,
+        num_queries=4,
+        retrieve_k=60,
+        final_k=20,
+        dense_weight=0.5,
+        sparse_weight=0.5,
+        adaptive_weights=False,
+        min_dense_similarity=0.15,
+        min_bm25_score=0.0,
+        max_per_source: Optional[int] = 3,
+    ) -> Dict[str, Any]:
+        """
+        Pick the retrieval strategy for this query.
+
+        Returns a dict like:
+        {
+            "strategy": "dense" | "sparse" | "hybrid" | "metadata_hybrid",
+            "reason": "...",
+            "signals": {...},
+            "params": {...}
+        }
+        """
+        q = (query or "").strip()
+        q_lower = q.lower()
+        tokens = re.findall(r"\b[a-z0-9_./:-]+\b", q_lower)
+        token_count = len(tokens)
+
+        metadata_cues = (
+            "latest", "recent", "today", "uploaded", "upload", "file",
+            "document", "doc", "source", "section", "page", "chapter",
+            "appendix", "version", "pdf", "notes", "proposal", "thesis",
+            "date", "when", "where", "who", "which", "find", "show me", "give me", "retrieve",
+        )
+
+        semantic_cues = (
+            "what is", "what are", "how", "why", "explain", "compare",
+            "difference", "summarize", "overview", "relationship", "meaning",
+            "describe", "works", "work", "concept", "idea", "insight", "implication", "consequence",
+            "benefit", "advantage", "disadvantage", "pro", "con", "strength", "weakness",
+            "cause", "effect", "impact", "influence", "correlation", "association",
+        )
+
+        has_metadata_cue = any(term in q_lower for term in metadata_cues)
+        has_semantic_cue = any(term in q_lower for term in semantic_cues)
+
+        # Strong lexical / exact-match signals
+        has_code_like = bool(
+            re.search(r"(`[^`]+`|[A-Za-z_][A-Za-z0-9_]*\(|::|->|==|!=|<=|>=)", q)
+        )
+        has_identifier = (
+            bool(re.search(r"\b[A-Z]{2,}(?:[-_/][A-Z0-9]+)*\b", q))
+            or bool(re.search(r"\b[\w.-]*\d[\w.-]*\b", q))
+            or "_" in q
+            or "/" in q
+        )
+
+        sparse_score = 0
+        if has_code_like:
+            sparse_score += 2
+        if has_identifier:
+            sparse_score += 1
+        if len(tokens) <= 4 and not has_semantic_cue:
+            sparse_score += 1
+
+        dense_score = 0
+        if has_semantic_cue:
+            dense_score += 2
+        if token_count >= 6:
+            dense_score += 1
+        if any(word in q_lower for word in ("explain", "why", "how", "difference", "compare")):
+            dense_score += 1
+
+        metadata_score = 0
+        if has_metadata_cue:
+            metadata_score += 2
+        if "section" in q_lower or "page" in q_lower or "source" in q_lower:
+            metadata_score += 1
+
+        # Strategy decision
+        if metadata_score >= 2:
+            strategy = "metadata_hybrid"
+        elif sparse_score >= 2 and sparse_score >= dense_score + 1:
+            strategy = "sparse"
+        elif dense_score >= 2 and dense_score >= sparse_score + 1:
+            strategy = "dense"
+        elif sparse_score > 0 and dense_score > 0:
+            strategy = "hybrid"
+        elif has_semantic_cue:
+            strategy = "dense"
+        elif has_identifier or has_code_like:
+            strategy = "sparse"
+        else:
+            strategy = "hybrid"
+
+        params = {
+            "num_queries": num_queries,
+            "retrieve_k": retrieve_k,
+            "final_k": final_k,
+            "dense_weight": dense_weight,
+            "sparse_weight": sparse_weight,
+            "adaptive_weights": adaptive_weights,
+            "min_dense_similarity": min_dense_similarity,
+            "min_bm25_score": min_bm25_score,
+            "max_per_source": max_per_source,
+        }
+
+        if strategy == "sparse":
+            params.update({
+                "num_queries": min(3, max(2, num_queries - 1)),
+                "retrieve_k": max(30, int(retrieve_k * 0.85)),
+                "final_k": max(8, min(final_k, 12)),
+                "dense_weight": 0.25,
+                "sparse_weight": 0.75,
+                "adaptive_weights": True,
+            })
+            reason = "Exact terms, identifiers, or code-like patterns look important."
+        elif strategy == "dense":
+            params.update({
+                "num_queries": max(num_queries, 4),
+                "retrieve_k": max(retrieve_k, int(retrieve_k * 1.10)),
+                "final_k": max(final_k, 12),
+                "dense_weight": 0.75,
+                "sparse_weight": 0.25,
+                "adaptive_weights": True,
+                "min_dense_similarity": max(min_dense_similarity, 0.20),
+            })
+            reason = "This looks like a conceptual or paraphrased query."
+        elif strategy == "metadata_hybrid":
+            params.update({
+                "num_queries": max(3, num_queries),
+                "retrieve_k": max(retrieve_k, int(retrieve_k * 0.95)),
+                "final_k": max(final_k, 10),
+                "dense_weight": 0.5,
+                "sparse_weight": 0.5,
+                "adaptive_weights": True,
+                "max_per_source": 2 if max_per_source is not None else None,
+            })
+            reason = "The query contains metadata-like constraints such as source, section, or date."
+        else:
+            params.update({
+                "num_queries": max(3, num_queries),
+                "retrieve_k": retrieve_k,
+                "final_k": final_k,
+                "dense_weight": 0.5,
+                "sparse_weight": 0.5,
+                "adaptive_weights": True if adaptive_weights else adaptive_weights,
+            })
+            reason = "Mixed signals. Hybrid retrieval is the safest default."
+
+        return {
+            "strategy": strategy,
+            "reason": reason,
+            "signals": {
+                "has_metadata_cue": has_metadata_cue,
+                "has_semantic_cue": has_semantic_cue,
+                "has_code_like": has_code_like,
+                "has_identifier": has_identifier,
+                "token_count": token_count,
+                "sparse_score": sparse_score,
+                "dense_score": dense_score,
+                "metadata_score": metadata_score,
+            },
+            "params": params,
+        }
+
     def search(
         self,
         query,
@@ -271,9 +507,24 @@ class MultiQueryHybridRetriever:
         min_bm25_score=0.0,
         max_per_source: Optional[int] = 3,
     ):
+        strategy_info = self._select_retrieval_strategy(
+            query=query,
+            num_queries=num_queries,
+            retrieve_k=retrieve_k,
+            final_k=final_k,
+            dense_weight=dense_weight,
+            sparse_weight=sparse_weight,
+            adaptive_weights=adaptive_weights,
+            min_dense_similarity=min_dense_similarity,
+            min_bm25_score=min_bm25_score,
+            max_per_source=max_per_source,
+        )
+
+        p = strategy_info["params"]
+
         expanded_queries = self.query_generator.generate_queries(
             query,
-            num_queries=num_queries,
+            num_queries=p["num_queries"],
         )
 
         query_results = []
@@ -281,30 +532,33 @@ class MultiQueryHybridRetriever:
         for q in expanded_queries:
             results = self.retriever.hybrid_search(
                 q,
-                retrieve_k=retrieve_k,
-                final_k=final_k,
+                retrieve_k=p["retrieve_k"],
+                final_k=p["final_k"],
                 k=k,
-                dense_weight=dense_weight,
-                sparse_weight=sparse_weight,
-                adaptive_weights=adaptive_weights,
-                min_dense_similarity=min_dense_similarity,
-                min_bm25_score=min_bm25_score,
-                max_per_source=max_per_source,
+                dense_weight=p["dense_weight"],
+                sparse_weight=p["sparse_weight"],
+                adaptive_weights=p["adaptive_weights"],
+                min_dense_similarity=p["min_dense_similarity"],
+                min_bm25_score=p["min_bm25_score"],
+                max_per_source=p["max_per_source"],
             )
             query_results.append(results)
 
         merged = self._aggregate_results(
             query_results,
             k=k,
-            max_per_source=max_per_source,
+            max_per_source=p["max_per_source"],
         )
 
-        # Rerank merged results with Reranker
         reranked = self.reranker.rerank(
             query=query,
             retrieved_chunks=merged,
-            top_k=final_k,
+            top_k=p["final_k"],
         )
+
+        for chunk in reranked:
+            chunk["retrieval_strategy"] = strategy_info["strategy"]
+            chunk["retrieval_strategy_reason"] = strategy_info["reason"]
 
         return reranked
 
@@ -411,9 +665,24 @@ class MultiQueryHybridRetriever:
                 ] if chunks else [],
             }
 
+        strategy_info = self._select_retrieval_strategy(
+            query=query,
+            num_queries=num_queries,
+            retrieve_k=retrieve_k,
+            final_k=final_k,
+            dense_weight=dense_weight,
+            sparse_weight=sparse_weight,
+            adaptive_weights=adaptive_weights,
+            min_dense_similarity=min_dense_similarity,
+            min_bm25_score=min_bm25_score,
+            max_per_source=max_per_source,
+        )
+
+        strategy_params = strategy_info["params"]
+
         expanded_queries = self.query_generator.generate_queries(
             query,
-            num_queries=num_queries,
+            num_queries=strategy_params["num_queries"],
         )
 
         per_query_results = []
@@ -421,15 +690,15 @@ class MultiQueryHybridRetriever:
         for expanded_query in expanded_queries:
             results = self.retriever.hybrid_search(
                 expanded_query,
-                retrieve_k=retrieve_k,
-                final_k=final_k,
+                retrieve_k=strategy_params["retrieve_k"],
+                final_k=strategy_params["final_k"],
                 k=k,
-                dense_weight=dense_weight,
-                sparse_weight=sparse_weight,
-                adaptive_weights=adaptive_weights,
-                min_dense_similarity=min_dense_similarity,
-                min_bm25_score=min_bm25_score,
-                max_per_source=max_per_source,
+                dense_weight=strategy_params["dense_weight"],
+                sparse_weight=strategy_params["sparse_weight"],
+                adaptive_weights=strategy_params["adaptive_weights"],
+                min_dense_similarity=strategy_params["min_dense_similarity"],
+                min_bm25_score=strategy_params["min_bm25_score"],
+                max_per_source=strategy_params["max_per_source"],
             )
 
             per_query_results.append(
@@ -762,16 +1031,26 @@ class MultiQueryHybridRetriever:
 
         retrieval_health = self._compute_retrieval_health(retrieval_health_input)
 
+        relevance_confidence = self._compute_relevance_confidence(retrieval_health_input)
+        diversity_confidence = self._compute_diversity_confidence({
+            "duplicate_stats": duplicate_stats,
+            "source_diversity": source_diversity,
+        })
+
         diagnostics = {
             "query": query,
             "expanded_queries": expanded_queries,
             "num_expanded_queries": len(expanded_queries),
+            "retrieval_strategy": strategy_info["strategy"],
+            "retrieval_strategy_details": strategy_info,
             "duplicate_stats": duplicate_stats,
             "rerank_lift": rerank_lift,
             "metadata_coverage": metadata_coverage,
             "source_diversity": source_diversity,
             "retrieval_health": retrieval_health,
             "lexical_overlap": lexical_overlap_stats,
+            "relevance_confidence": relevance_confidence,
+            "diversity_confidence": diversity_confidence,
             "per_query_results": [
                 {
                     "query": item["query"],
@@ -927,6 +1206,45 @@ class MultiQueryHybridRetriever:
         else:
             return {"final_k": 15, "context_top_k": 7}
 
+    # Confidence routing based on retrieval health - whether to trust retrieval as is, to be cautious or to consider retrying or abstaining.
+    def _choose_confidence_route(self, diagnostics: Dict[str, Any]) -> Dict[str, str]:
+        """
+        Route based mainly on relevance confidence, with diversity as a modifier.
+        """
+        relevance = diagnostics.get("relevance_confidence", {})
+        diversity = diagnostics.get("diversity_confidence", {})
+
+        relevance_label = relevance.get("label", "medium")
+        diversity_label = diversity.get("label", "medium")
+
+        # Main decision: relevance
+        if relevance_label == "strong":
+            if diversity_label == "weak":
+                return {
+                    "confidence": "medium",
+                    "action": "generate_cautiously",
+                    "reason": "Relevant evidence found, but it is too repetitive.",
+                }
+            return {
+                "confidence": "high",
+                "action": "generate",
+                "reason": "Relevant evidence is strong enough to answer normally.",
+            }
+
+        if relevance_label == "medium":
+            return {
+                "confidence": "medium",
+                "action": "generate_cautiously",
+                "reason": "Evidence is usable but not ideal.",
+            }
+
+        return {
+            "confidence": "low",
+            "action": "retry_or_abstain",
+            "reason": "Relevant evidence is too weak to trust.",
+        }
+        
+
     # Adaptive retrieval controller with retry logic based on diagnostics
     def adaptive_search_with_retry(
         self,
@@ -983,6 +1301,7 @@ class MultiQueryHybridRetriever:
 
         initial_health = initial_result["diagnostics"].get("retrieval_health", {})
         is_weak = initial_health.get("is_weak", False)
+        initial_route = self._choose_confidence_route(initial_result["diagnostics"])
 
         # System does not always need the same amount of context as too little context misses evidence
         # too much context adds noise
@@ -999,6 +1318,7 @@ class MultiQueryHybridRetriever:
                 "chosen_final_k": chosen_final_k,
                 "chosen_context_top_k": chosen_context_top_k,
                 "used_retry": False,
+                "confidence_route": initial_route,
                 "retry_params": None,
                 "initial_result": initial_result,
                 "final_result": initial_result,
@@ -1034,8 +1354,12 @@ class MultiQueryHybridRetriever:
             include_scores=include_scores,
         )
 
+        #final_health = retry_result["diagnostics"].get("retrieval_health", {})
+        final_route = self._choose_confidence_route(retry_result["diagnostics"])
+
         return {
             "used_retry": True,
+            "confidence_route": final_route,
             "decision_trace": decision_trace,
             "chosen_final_k": chosen_final_k,
             "chosen_context_top_k": chosen_context_top_k,
@@ -1063,6 +1387,14 @@ class MultiQueryHybridRetriever:
         print("\nEXPANDED QUERIES:")
         for i, q in enumerate(diag["expanded_queries"], start=1):
             print(f"  [{i}] {q}")
+
+        print("\nRETRIEVAL STRATEGY:")
+
+        strategy = diag.get("retrieval_strategy", "unknown")
+        strategy_details = diag.get("retrieval_strategy_details", {})
+
+        print(f"  Strategy: {strategy}")
+        print(f"  Reason: {strategy_details.get('reason', '')}")
 
         print("\nDUPLICATE STATS:")
         dup = diag["duplicate_stats"]
@@ -1245,12 +1577,64 @@ class MultiQueryHybridRetriever:
             "retrieval_health", {}
         )
 
+
         print("\n==================================================")
         print("DYNAMIC CONTEXT SIZING POLICY")
         print("==================================================")
 
         print(f"  chosen_final_k: {adaptive_result.get('chosen_final_k')}")
         print(f"  chosen_context_top_k: {adaptive_result.get('chosen_context_top_k')}")
+
+        relevance = adaptive_result["final_result"]["diagnostics"].get("relevance_confidence", {})
+        diversity = adaptive_result["final_result"]["diagnostics"].get("diversity_confidence", {})
+
+        strategy = adaptive_result["final_result"]["diagnostics"].get(
+            "retrieval_strategy", "unknown"
+        )
+
+        strategy_details = adaptive_result["final_result"]["diagnostics"].get(
+            "retrieval_strategy_details", {}
+        )
+
+        print("\n==================================================")
+        print("RETRIEVAL STRATEGY SELECTION")
+        print("==================================================")
+
+        print(f"  Strategy: {strategy}")
+        print(f"  Reason: {strategy_details.get('reason', '')}")
+
+        signals = strategy_details.get("signals", {})
+        if signals:
+            print("\n  Signals:")
+            for key, value in signals.items():
+                print(f"    {key}: {value}")
+
+        params = strategy_details.get("params", {})
+        if params:
+            print("\n  Selected Parameters:")
+            for key, value in params.items():
+                print(f"    {key}: {value}")
+
+        print("\n==================================================")
+        print("\nRELEVANCE CONFIDENCE")
+        print("\n==================================================")
+        print(f"  score: {relevance.get('score', 0.0)}")
+        print(f"  label: {relevance.get('label', 'unknown')}")
+        print(f"  reason: {relevance.get('reason', '')}")
+
+        print("\nDIVERSITY CONFIDENCE")
+        print(f"  score: {diversity.get('score', 0.0)}")
+        print(f"  label: {diversity.get('label', 'unknown')}")
+        print(f"  reason: {diversity.get('reason', '')}")
+
+        confidence_route = adaptive_result.get("confidence_route", {})
+
+        print("\n==================================================")
+        print("\nCONFIDENCE ROUTE")
+        print("\n==================================================")
+        print(f"  confidence: {confidence_route.get('confidence', 'unknown')}")
+        print(f"  action: {confidence_route.get('action', 'unknown')}")
+        print(f"  reason: {confidence_route.get('reason', '')}")
 
         print("\n==================================================")
         print("ADAPTIVE RETRIEVAL")
