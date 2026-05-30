@@ -1,4 +1,4 @@
-from typing import Optional, List, Dict, Any
+from typing import Dict, Any, List, Optional
 import io
 import sys
 from pathlib import Path
@@ -18,6 +18,7 @@ if str(PIPELINE_ROOT) not in sys.path:
 from retrieval.retriever import Retriever
 from retrieval.multi_query_retriever import MultiQueryRetriever
 from retrieval.reranker import Reranker
+from generation.generator import Generator
 
 
 class MultiQueryHybridRetriever:
@@ -359,7 +360,7 @@ class MultiQueryHybridRetriever:
             "latest", "recent", "today", "uploaded", "upload", "file",
             "document", "doc", "source", "section", "page", "chapter",
             "appendix", "version", "pdf", "notes", "proposal", "thesis",
-            "date", "when", "where", "who", "which", "find", "show me", "give me", "retrieve",
+            "date", "when", "find"
         )
 
         semantic_cues = (
@@ -1209,15 +1210,19 @@ class MultiQueryHybridRetriever:
     # Confidence routing based on retrieval health - whether to trust retrieval as is, to be cautious or to consider retrying or abstaining.
     def _choose_confidence_route(self, diagnostics: Dict[str, Any]) -> Dict[str, str]:
         """
-        Route based mainly on relevance confidence, with diversity as a modifier.
+        Route based on relevance confidence, with domain-gate support.
         """
         relevance = diagnostics.get("relevance_confidence", {})
         diversity = diagnostics.get("diversity_confidence", {})
+        domain_gate = diagnostics.get("domain_gate", {})
 
         relevance_label = relevance.get("label", "medium")
         diversity_label = diversity.get("label", "medium")
 
-        # Main decision: relevance
+        in_domain = not domain_gate.get("is_ood", False)
+        domain_fit = domain_gate.get("combined_fit", 0.0)
+
+        # Strong relevance
         if relevance_label == "strong":
             if diversity_label == "weak":
                 return {
@@ -1231,6 +1236,7 @@ class MultiQueryHybridRetriever:
                 "reason": "Relevant evidence is strong enough to answer normally.",
             }
 
+        # Medium relevance
         if relevance_label == "medium":
             return {
                 "confidence": "medium",
@@ -1238,12 +1244,144 @@ class MultiQueryHybridRetriever:
                 "reason": "Evidence is usable but not ideal.",
             }
 
+        # Weak relevance, but domain gate says the query is still in-domain
+        if in_domain and domain_fit >= 0.55:
+            return {
+                "confidence": "medium",
+                "action": "generate_cautiously",
+                "reason": "Query appears in-domain and probe evidence is plausible, but rerank confidence is low.",
+            }
+
         return {
             "confidence": "low",
             "action": "retry_or_abstain",
             "reason": "Relevant evidence is too weak to trust.",
         }
-        
+
+
+
+    
+    # A soft gate to detect out-of-domain queries before doing heavy retrieval work.
+    # Runs a quick probe search against the corpus and checks if the query seems to belong to the same domain based on retrieval signals and lexical overlap.
+    # This is intentionally designed to be soft and corpus-aware without hardcoded rules, relying instead on evidence from the actual index
+    # If best score and overlap are too weak then it marks the query as out of domain (OOD)
+    # Returns early with abstention
+    def _domain_gate_preflight(
+        self,
+        query,
+        probe_k: int = 5,
+        overlap_threshold: float = 0.08,
+    ):
+        """
+        Lightweight pre-retrieval gate.
+        """
+        try:
+            probe_results = self.retriever.hybrid_search(
+                query,
+                retrieve_k=probe_k,
+                final_k=min(5, probe_k),
+                k=60,
+                dense_weight=0.5,
+                sparse_weight=0.5,
+                adaptive_weights=False,
+                min_dense_similarity=0.0,
+                min_bm25_score=0.0,
+                max_per_source=1,
+            )
+        except Exception as exc:
+            return {
+                "is_ood": True,
+                "confidence": "low",
+                "action": "abstain",
+                "reason": f"Domain gate probe failed: {exc}",
+                "best_score": 0.0,
+                "best_overlap": 0.0,
+                "combined_fit": 0.0,
+                "probe_count": 0,
+                "top_source": None,
+                "top_preview": "",
+            }
+
+        STOPWORDS = {
+            "a", "an", "the", "is", "are", "was", "were",
+            "what", "how", "why", "when", "where", "which",
+            "and", "or", "but", "if", "then",
+            "of", "in", "on", "to", "for", "with",
+            "do", "does", "did", "they", "them", "their",
+            "this", "that", "these", "those", "like",
+            "it", "its", "as", "at", "by",
+            "from", "about", "into", "through",
+            "can", "could", "would", "should",
+            "be", "been", "being",
+            "vs", "versus"
+        }
+
+        q_tokens = set(re.findall(r"\b[a-z0-9]+\b", (query or "").lower()))
+        q_tokens = {t for t in q_tokens if t not in STOPWORDS}
+        if not q_tokens:
+            q_tokens = set(re.findall(r"\b[a-z0-9]+\b", (query or "").lower()))
+
+        best_score = 0.0
+        best_overlap = 0.0
+        best_source = None
+        best_preview = ""
+
+        for chunk in probe_results[:probe_k]:
+            text = chunk.get("text", "")
+            chunk_tokens = set(re.findall(r"\b[a-z0-9]+\b", text.lower()))
+            chunk_tokens = {t for t in chunk_tokens if t not in STOPWORDS}
+
+            overlap = (len(q_tokens & chunk_tokens) / len(q_tokens)) if q_tokens else 0.0
+
+            score = max(
+                float(chunk.get("cosine_score", 0.0) or 0.0),
+                float(chunk.get("rerank_score", 0.0) or 0.0),
+                float(chunk.get("rrf_score", 0.0) or 0.0),
+                float(chunk.get("multi_query_rrf_score", 0.0) or 0.0),
+            )
+
+            if score > best_score:
+                best_score = score
+                best_overlap = overlap
+                best_source = chunk.get("source") or chunk.get("metadata", {}).get("source") or "unknown"
+                best_preview = text[:140].replace("\n", " ")
+
+        combined_fit = 0.7 * best_score + 0.3 * best_overlap
+
+        if combined_fit >= 0.55:
+            return {
+                "is_ood": False,
+                "confidence": "high" if combined_fit >= 0.70 else "medium",
+                "action": "continue",
+                "reason": (
+                    f"Probe retrieval looks plausible "
+                    f"(combined_fit={combined_fit:.3f}, best_score={best_score:.3f}, "
+                    f"best_overlap={best_overlap:.3f})."
+                ),
+                "best_score": round(best_score, 4),
+                "best_overlap": round(best_overlap, 4),
+                "combined_fit": round(combined_fit, 4),
+                "probe_count": len(probe_results),
+                "top_source": best_source,
+                "top_preview": best_preview,
+            }
+
+        return {
+            "is_ood": True,
+            "confidence": "low",
+            "action": "abstain",
+            "reason": (
+                f"Probe retrieval is too weak "
+                f"(combined_fit={combined_fit:.3f}, best_score={best_score:.3f}, "
+                f"best_overlap={best_overlap:.3f}); query may be out of domain."
+            ),
+            "best_score": round(best_score, 4),
+            "best_overlap": round(best_overlap, 4),
+            "combined_fit": round(combined_fit, 4),
+            "probe_count": len(probe_results),
+            "top_source": best_source,
+            "top_preview": best_preview,
+        }
 
     # Adaptive retrieval controller with retry logic based on diagnostics
     def adaptive_search_with_retry(
@@ -1283,6 +1421,68 @@ class MultiQueryHybridRetriever:
             }
         """
 
+        # This is the actual gate check before retrieving
+        # If query looks OOD then no expansion, no retrieval, no reranking and no retry loop
+        domain_gate = self._domain_gate_preflight(query)
+
+        if domain_gate and domain_gate["is_ood"]:
+            empty_diag = {
+                "query": query,
+                "domain_gate": domain_gate,
+                "retrieval_health": {
+                    "is_weak": True,
+                    "severity": "weak",
+                    "risk_score": 1.0,
+                    "reasons": [domain_gate["reason"]],
+                    "summary": {},
+                },
+                "relevance_confidence": {
+                    "score": 0.0,
+                    "label": "weak",
+                    "reason": "Blocked by domain gate before retrieval.",
+                },
+                "diversity_confidence": {
+                    "score": 0.0,
+                    "label": "weak",
+                    "reason": "No in-domain evidence retrieved.",
+                },
+            }
+
+            empty_result = {
+                "query": query,
+                "expanded_queries": [],
+                "per_query_results": [],
+                "merged_chunks": [],
+                "reranked_chunks": [],
+                "context_chunks": [],
+                "context": "",
+                "diagnostics": empty_diag,
+            }
+
+            return {
+                "used_retry": False,
+                "confidence_route": {
+                    "confidence": "low",
+                    "action": "retry_or_abstain",
+                    "reason": "Domain gate detected an out-of-domain query.",
+                },
+                "decision_trace": [
+                    {
+                        "reason": "Domain gate blocked the query",
+                        "actions": [
+                            "Skipped retrieval",
+                            "Skipped reranking",
+                            "Abstained early",
+                        ],
+                    }
+                ],
+                "chosen_final_k": 0,
+                "chosen_context_top_k": 0,
+                "retry_params": None,
+                "initial_result": empty_result,
+                "final_result": empty_result,
+            }
+
         initial_result = self.search_with_diagnostics(
             query=query,
             num_queries=num_queries,
@@ -1298,6 +1498,9 @@ class MultiQueryHybridRetriever:
             context_top_k=context_top_k,
             include_scores=include_scores,
         )
+
+        # Attach gate info to the initial result so it always shows up in diagnostics
+        initial_result["diagnostics"]["domain_gate"] = domain_gate
 
         initial_health = initial_result["diagnostics"].get("retrieval_health", {})
         is_weak = initial_health.get("is_weak", False)
@@ -1354,7 +1557,7 @@ class MultiQueryHybridRetriever:
             include_scores=include_scores,
         )
 
-        #final_health = retry_result["diagnostics"].get("retrieval_health", {})
+        retry_result["diagnostics"]["domain_gate"] = domain_gate
         final_route = self._choose_confidence_route(retry_result["diagnostics"])
 
         return {
@@ -1596,6 +1799,26 @@ class MultiQueryHybridRetriever:
             "retrieval_strategy_details", {}
         )
 
+        domain_gate = adaptive_result["final_result"]["diagnostics"].get("domain_gate", {})
+
+        print("\n==================================================")
+        print("DOMAIN GATE / OOD DETECTION")
+        print("==================================================")
+
+        if domain_gate:
+            print(f"  is_ood: {domain_gate.get('is_ood', False)}")
+            print(f"  confidence: {domain_gate.get('confidence', 'unknown')}")
+            print(f"  action: {domain_gate.get('action', 'unknown')}")
+            print(f"  reason: {domain_gate.get('reason', '')}")
+            print(f"  best_score: {domain_gate.get('best_score', 0.0)}")
+            print(f"  best_overlap: {domain_gate.get('best_overlap', 0.0)}")
+            print(f"  combined_fit: {domain_gate.get('combined_fit', 0.0)}")
+            print(f"  probe_count: {domain_gate.get('probe_count', 0)}")
+            print(f"  top_source: {domain_gate.get('top_source', 'unknown')}")
+            print(f"  top_preview: {domain_gate.get('top_preview', '')}")
+        else:
+            print("  domain gate: not run")
+
         print("\n==================================================")
         print("RETRIEVAL STRATEGY SELECTION")
         print("==================================================")
@@ -1803,7 +2026,7 @@ if __name__ == "__main__":
     # For adaptive search testing, use queries that are more likely to trigger reason-aware retrieval
     test_queries = [ 
         "that issue where transformers ignore middle context", 
-        "bm25 retrieval embeddings hybrid search reranking", 
+        "list the countries in the world", 
         "lost in the middle attention problem", 
         "fix my wifi router",
         "what is dense and sparse retrieval?" ]
@@ -1842,6 +2065,15 @@ if __name__ == "__main__":
 
         multi_query_retriever.print_adaptive_result(result)
 
+        generator = Generator()
+
+        # Use the result returned from adaptive_search_with_retry
+        answer = generator.generate(
+            query=query,
+            context=result["final_result"]["context"],
+            confidence_route=result.get("confidence_route")
+        )
+
         # final_result = result["final_result"]
 
 
@@ -1862,8 +2094,13 @@ if __name__ == "__main__":
 
         #     print("-" * 80)
 
-        # print("\n==================================================")
-        # print("PROMPT-READY CONTEXT")
-        # print("==================================================")
+        print("\n==================================================")
+        print("PROMPT-READY CONTEXT")
+        print("==================================================")
 
-        # print(final_result["context"])
+        print(result["final_result"]["context"])
+
+        print("\n==================================================")
+        print("FINAL LLM ANSWER")
+        print("==================================================")
+        print(answer)

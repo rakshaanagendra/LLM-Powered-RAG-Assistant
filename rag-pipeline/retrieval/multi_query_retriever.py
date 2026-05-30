@@ -36,28 +36,35 @@ class MultiQueryRetriever:
         query = self._clean_text(query)
 
         prompt = f"""
-You are an expert retrieval query expansion system for RAG applications.
+You are a retrieval query expansion system for RAG.
 
-Generate diverse search queries that improve document retrieval quality.
-
-Goals:
-- Cover semantic variations
-- Cover keyword variations
-- Cover technical terminology
-- Cover abbreviations if relevant
-- Cover alternative phrasings
+Your job is to produce a small set of highly targeted search queries that help document retrieval.
 
 Rules:
-- Keep queries short and retrieval-oriented
-- Do not answer the question
-- Do not explain anything
-- Return ONLY a valid JSON list of strings
-- Do not use markdown
+- Return ONLY a valid JSON list of strings.
+- Do not use markdown.
+- Do not answer the question.
+- Do not explain anything.
+- Keep each query short, specific, and retrieval-oriented.
+- Prefer exact terms, technical keywords, abbreviations, and concise paraphrases.
+- Avoid verbose, generic, or overly broad queries.
+- Avoid repeating the same idea in different words.
+- Do not include filler words unless they are essential.
+- Generate at most {num_queries - 1} new queries.
+- The original query will be added automatically.
 
-Example:
+Good examples:
 [
-  "dense retrieval semantic search",
-  "sparse retrieval bm25 lexical search"
+  "dense retrieval",
+  "sparse retrieval bm25",
+  "hybrid retrieval reranking"
+]
+
+Bad examples:
+[
+  "how to improve retrieval quality",
+  "alternative phrasings for the concept",
+  "more information about this topic"
 ]
 
 User Query:
@@ -65,40 +72,42 @@ User Query:
 """.strip()
 
         try:
+            messages = [
+                {
+                    "role": "system",
+                    "content": (
+                        "You generate short, precise, retrieval-focused search queries. "
+                        "You prefer technical terms and concise variants."
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": prompt,
+                },
+            ]
+
             if self.client is None:
                 response = ollama.chat(
                     model=self.model_name,
-                    messages=[
-                        {
-                            "role": "system",
-                            "content": "You generate multiple retrieval-focused search queries.",
-                        },
-                        {
-                            "role": "user",
-                            "content": prompt,
-                        },
-                    ],
+                    messages=messages,
                     options={
-                        "temperature": 0.3,
+                        "temperature": 0.1,
+                        "top_p": 0.8,
                     },
                 )
             else:
                 response = self.client.chat(
                     model=self.model_name,
-                    messages=[
-                        {
-                            "role": "system",
-                            "content": "You generate multiple retrieval-focused search queries.",
-                        },
-                        {
-                            "role": "user",
-                            "content": prompt,
-                        },
-                    ],
+                    messages=messages,
                 )
 
             content = response["message"]["content"]
             content = self._clean_text(content)
+
+            # Try to extract a JSON list even if the model adds extra text
+            match = re.search(r"\[[\s\S]*\]", content)
+            if match:
+                content = match.group(0)
 
             generated_queries = json.loads(content)
 
@@ -108,11 +117,10 @@ User Query:
             generated_queries = [
                 self._clean_text(q)
                 for q in generated_queries
-                if isinstance(q, str)
+                if isinstance(q, str) and self._clean_text(q)
             ]
 
             generated_queries.insert(0, query)
-
             generated_queries = self._deduplicate_queries(generated_queries)
 
             return generated_queries[:num_queries]
