@@ -138,11 +138,13 @@ if __name__ == "__main__":
     print(f"Loaded {len(documents)} document(s)")
     print(f"Created {len(chunks)} chunk(s)")
 
-    print("\nAll chunks:")
-    for i, chunk in enumerate(chunks, start=1):
+    target_source = "REACT"
+    source_chunks = [c for c in chunks if target_source.lower() in c.get("source", "").lower()]
+
+    print(f"\nChunks for source containing '{target_source}' ({len(source_chunks)}):")
+    for i, chunk in enumerate(source_chunks[:5], start=1):
         print("\n==================================================")
-        print(f"Chunk {i}/{len(chunks)}")
+        print(f"Chunk {i}/{len(source_chunks)}")
         print("==================================================")
         print(json.dumps(chunk, ensure_ascii=False, indent=2))
-    
-    
+

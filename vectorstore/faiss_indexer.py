@@ -85,43 +85,43 @@ def load_index(load_path="data/processed"):
 #     print("  - save_index(index, mapping, save_path)")
 #     print("  - load_index(load_path) → (index, mapping)")
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    PROJECT_ROOT = os.path.abspath(
-        os.path.join(
-            os.path.dirname(__file__),
-            ".."
-        )
-    )
+#     PROJECT_ROOT = os.path.abspath(
+#         os.path.join(
+#             os.path.dirname(__file__),
+#             ".."
+#         )
+#     )
 
-    processed_path = os.path.join(
-        PROJECT_ROOT,
-        "data",
-        "processed"
-    )
+#     processed_path = os.path.join(
+#         PROJECT_ROOT,
+#         "data",
+#         "processed"
+#     )
 
-    index, mapping = load_index(processed_path)
+#     index, mapping = load_index(processed_path)
 
-    print(f"Total chunks: {len(mapping)}")
+#     print(f"Total chunks: {len(mapping)}")
 
-    lora_chunks = []
+#     lora_chunks = []
 
-    for chunk in mapping.values():
+#     for chunk in mapping.values():
 
-        source = chunk.get("source", "")
+#         source = chunk.get("source", "")
 
-        if "lora" in source.lower():
+#         if "lora" in source.lower():
 
-            lora_chunks.append(chunk)
+#             lora_chunks.append(chunk)
 
-    print(f"\nFound {len(lora_chunks)} LoRA chunks")
+#     print(f"\nFound {len(lora_chunks)} LoRA chunks")
 
-    if lora_chunks:
+#     if lora_chunks:
 
-        print("\n" + "=" * 80)
-        print("FIRST LORA CHUNK")
-        print("=" * 80)
+#         print("\n" + "=" * 80)
+#         print("FIRST LORA CHUNK")
+#         print("=" * 80)
 
-        print(lora_chunks[0]["text"][:1500])
+#         print(lora_chunks[0]["text"][:1500])
 
-        print("\n" + "=" * 80)
+#         print("\n" + "=" * 80)

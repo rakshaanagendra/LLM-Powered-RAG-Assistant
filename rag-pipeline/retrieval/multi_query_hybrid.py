@@ -632,6 +632,7 @@ class MultiQueryHybridRetriever:
         )
         has_identifier = (
             bool(re.search(r"\b[A-Z]{2,}(?:[-_/][A-Z0-9]+)*\b", q))
+            or bool(re.search(r"\b[a-z]+[A-Z][a-zA-Z]*\b", q))  # camelCase: ReAct, LoRA, QLoRA, AutoGPT
             or bool(re.search(r"\b[\w.-]*\d[\w.-]*\b", q))
             or "_" in q
             or "/" in q
@@ -754,6 +755,17 @@ class MultiQueryHybridRetriever:
         elif intent == "definition":
             params["retrieve_k"] = min(params["retrieve_k"], 40)
             params["final_k"] = min(params["final_k"], 10)
+
+            if strategy == "dense":
+                original_strategy = strategy
+                strategy = "hybrid"
+                params["dense_weight"] = 0.5
+                params["sparse_weight"] = 0.5
+                params["min_dense_similarity"] = min_dense_similarity   # reset from dense branch's raised 0.20 back to the caller's original value
+                reason = (
+                    f"Definition-intent override: scoring picked '{original_strategy}', "
+                    f"but definition queries default to hybrid for keyword safety."
+                )
 
         elif intent == "exploration":
             params["retrieve_k"] = max(params["retrieve_k"], 90)
@@ -1880,6 +1892,7 @@ class MultiQueryHybridRetriever:
         max_per_source: Optional[int] = 3,
         context_top_k: int = 5,
         include_scores: bool = True,
+        skip_retrieval_cache: bool = True,
     ):
         """
         Adaptive retrieval controller.
@@ -2052,6 +2065,7 @@ class MultiQueryHybridRetriever:
         initial_retrieval_start = time.perf_counter()
 
         initial_result = self.search_with_diagnostics(
+            skip_retrieval_cache=skip_retrieval_cache,
             query=query,
             num_queries=num_queries,
             retrieve_k=retrieve_k,
@@ -2801,17 +2815,17 @@ class MultiQueryHybridRetriever:
         #     print(f"\nTop Cosine Scores: {item['top_cosine_scores']}")
         #     print(f"Top RRF Scores: {item['top_rrf_scores']}")
 
-        # print("\n==================================================")
-        # print("MERGED RESULTS")
-        # print("==================================================")
+        print("\n==================================================")
+        print("MERGED RESULTS")
+        print("==================================================")
 
-        # merged = diag["merged_results"]
+        merged = diag["merged_results"]
 
-        # print(f"Merged Candidate Count: {merged['count']}")
+        print(f"Merged Candidate Count: {merged['count']}")
 
-        # print("\nMerged Source Distribution:")
-        # for source, count in merged["source_distribution"].items():
-        #     print(f"  {source}: {count}")
+        print("\nMerged Source Distribution:")
+        for source, count in merged["source_distribution"].items():
+            print(f"  {source}: {count}")
 
         # print("\nTop Multi-Query RRF Scores:")
         # print(merged["top_multi_query_rrf_scores"])
@@ -2824,6 +2838,18 @@ class MultiQueryHybridRetriever:
         # print("\nPIPELINE COUNTS")
         # print(f"  merged_chunks   : {len(fused_results)}")
         # print(f"  reranked_chunks : {len(reranked_chunks)}")
+
+        target_source = "REACT"
+        merged_chunks = diag.get("merged_chunks", [])
+        source_chunks = [
+            c for c in merged_chunks
+            if target_source.lower() in c.get("source", "unknown").lower()
+        ]
+
+        print(f"\nMerged Chunks for source containing '{target_source}' ({len(source_chunks)}):")
+        for i, chunk in enumerate(source_chunks, start=1):
+            print(f"\n[{i}] Source: {chunk.get('source', 'unknown')}")
+            print(chunk.get("text", ""))
 
 
         print("\n==================================================")
@@ -2846,11 +2872,11 @@ class MultiQueryHybridRetriever:
             print(f"Rerank Score: {score:.4f}")
             print(preview)
 
-        # print(f"Reranked Count: {reranked['count']}")
+        print(f"Reranked Count: {reranked['count']}")
 
-        # print("\nReranked Source Distribution:")
-        # for source, count in reranked["source_distribution"].items():
-        #     print(f"  {source}: {count}")
+        print("\nReranked Source Distribution:")
+        for source, count in reranked["source_distribution"].items():
+            print(f"  {source}: {count}")
 
         print("\nTop Rerank Scores:")
         print(reranked["top_rerank_scores"])
@@ -3152,7 +3178,8 @@ if __name__ == "__main__":
             # "What is LoRA?",
             # "What is QLoRA?",
             # "What is FlashAttention?",
-            "What is dense and sparse retrieval?",
+            # "What is dense and sparse retrieval?",
+             "What is the ReAct framework?",
 
 
             # # WHO / WHEN / WHERE
@@ -3363,14 +3390,17 @@ if __name__ == "__main__":
 
 # if __name__ == "__main__":
 
-#     query = "what is bm25"
+#     mq = MultiQueryHybridRetriever()
 
-#     retriever = MultiQueryHybridRetriever()
+#     hybrid_test_result = mq.retriever.hybrid_search(
+#     "What is the ReAct framework?",
+#     retrieve_k=40, final_k=10, k=60,
+#     dense_weight=0.5, sparse_weight=0.5,
+#     adaptive_weights=False,
+#     min_dense_similarity=0.0, min_bm25_score=0.0,
+#     max_per_source=None,
+# )
 
-#     result = retriever.search_with_diagnostics(
-#         query=query
-#     )
-
-#     print("\nCACHE INFO")
-#     print(result["diagnostics"]["cache"])
-
+#     for i, chunk in enumerate(hybrid_test_result, start=1):
+#         print(f"[{i}] source={chunk.get('source')} chunk_id={chunk.get('chunk_id')} "
+#             f"page={chunk.get('page')} text_start={chunk.get('text','')[:60]!r}")

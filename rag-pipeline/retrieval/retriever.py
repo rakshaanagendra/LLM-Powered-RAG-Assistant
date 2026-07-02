@@ -623,23 +623,25 @@ if __name__ == "__main__":
     #         print(format_chunk_text(text))
 
     retriever = Retriever()
+    print(f"Total vectors in index: {retriever.index.ntotal}")
+    print(f"Total chunks: {len(retriever.mapping)}")
     rewriter = QueryRewriter()
 
-    query = "When was RAG introduced?"
+    # query = "When was RAG introduced?"
 
-    dense_results = retriever.search(query, top_k=10)
+    # dense_results = retriever.search(query, top_k=10)
 
-    print("DENSE")
-    for r in dense_results[:10]:
-        print(r.get("source", "unknown"))
-        print(r.get("text", "")[:200])
+    # print("DENSE")
+    # for r in dense_results[:10]:
+    #     print(r.get("source", "unknown"))
+    #     print(r.get("text", "")[:200])
 
-    bm25_results = retriever.sparse.search(query, top_k=10)
+    # bm25_results = retriever.sparse.search(query, top_k=10)
 
-    print("BM25")
-    for r in bm25_results[:10]:
-        print(r.get("source", "unknown"))
-        print(r.get("text", "")[:200])
+    # print("BM25")
+    # for r in bm25_results[:10]:
+    #     print(r.get("source", "unknown"))
+    #     print(r.get("text", "")[:200])
 
     # results = retriever.hybrid_search(query, retrieve_k=10, final_k=10)
 

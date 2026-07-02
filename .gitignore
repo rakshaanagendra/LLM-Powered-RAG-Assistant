@@ -76,7 +76,6 @@ build/
 
 scripts/crawl_docs.py
 
-evaluation/
 
 commands.txt
 

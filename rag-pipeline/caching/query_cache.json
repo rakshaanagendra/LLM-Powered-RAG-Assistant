@@ -1,119 +1,312 @@
 {
-  "what is react?": [
-    "What is ReAct?",
-    "ReAct method definition",
-    "ReAct approach details",
-    "ReAct procedure explanation"
+  "what is the react framework?": [
+    "What is the ReAct framework?",
+    "React framework",
+    "reactive execution framework",
+    "active learning in retrieval"
+  ],
+  "how does toolformer enable a model to use tools?": [
+    "How does Toolformer enable a model to use tools?",
+    "toolformer mechanism",
+    "model tool integration",
+    "automated tool invocation in models"
+  ],
+  "compare react and reflexion approaches to agent reasoning.": [
+    "Compare ReAct and Reflexion approaches to agent reasoning.",
+    "React approach vs Reflexion",
+    "ReAct method comparison Reflexion",
+    "ReAct algorithm vs Reflexion"
+  ],
+  "describe how tree of thoughts differs from standard chain-of-thought reasoning.": [
+    "Describe how Tree of Thoughts differs from standard chain-of-thought reasoning.",
+    "tree of thoughts vs chain-of-thought reasoning",
+    "iterative reasoning approach compared to chain-of-thought",
+    "hierarchical reasoning versus linear chain-of-thought"
+  ],
+  "summarize the plan-and-solve prompting strategy.": [
+    "Summarize the Plan-and-Solve prompting strategy.",
+    "Plan-and-Solve prompting strategy overview",
+    "Plan-and-Solve method in optimization",
+    "Plan-and-Solve approach for problem solving"
+  ],
+  "what is graph of thoughts and how does it extend tree-based reasoning?": [
+    "What is Graph of Thoughts and how does it extend tree-based reasoning?",
+    "Graph of Thoughts",
+    "tree-based reasoning extension",
+    "Graph of Thoughts vs tree-based reasoning"
+  ],
+  "how does self-challenging improve an agent's reasoning ability?": [
+    "How does Self-Challenging improve an agent's reasoning ability?",
+    "self-challenging mechanism reinforcement learning",
+    "self-generated tasks for agents",
+    "reasoning enhancement through self-challenging"
+  ],
+  "what is retrieval-augmented generation?": [
+    "What is Retrieval-Augmented Generation?",
+    "retrieval-augmented generation",
+    "rag framework",
+    "generative retrieval augmented models"
+  ],
+  "how does colbert differ from standard dense retrieval?": [
+    "How does ColBERT differ from standard dense retrieval?",
+    "ColBERT vs dense retrieval",
+    "ColBERT similarity join",
+    "ColBERT approximate nearest neighbors"
+  ],
+  "what is corrective rag and when is it triggered?": [
+    "What is Corrective RAG and when is it triggered?",
+    "corrective retrieval augmented generation trigger conditions",
+    "corrective rag mechanism activation",
+    "dynamic corrective retrieval initiation"
+  ],
+  "describe how self-rag decides when to retrieve.": [
+    "Describe how Self-RAG decides when to retrieve.",
+    "self-rag decision mechanism",
+    "self-rag retrieval trigger",
+    "self-rag retrieval criteria"
+  ],
+  "compare self-rag and corrective rag.": [
+    "Compare Self-RAG and Corrective RAG.",
+    "Self-RAG vs Corrective RAG",
+    "Self-Retrieval-Augmented Generation Corrective RAG",
+    "Corrective RAG mechanism"
+  ],
+  "why does the 'lost in the middle' problem occur in long-context llms?": [
+    "Why does the 'lost in the middle' problem occur in long-context LLMs?",
+    "long context loss issue",
+    "middle context dropout llm",
+    "context truncation bias llm"
+  ],
+  "how does faiss perform approximate nearest neighbor search?": [
+    "How does FAISS perform approximate nearest neighbor search?",
+    "faiss approximate nearest neighbor",
+    "faiss implementation details",
+    "performance of faiss ann"
+  ],
+  "what is splade and how does it combine sparse and dense retrieval?": [
+    "What is SPLADE and how does it combine sparse and dense retrieval?",
+    "SPLADE sparse dense combination",
+    "SPLADE model architecture",
+    "SPLADE retrieval framework"
+  ],
+  "summarize the key techniques covered in advanced rag architectures.": [
+    "Summarize the key techniques covered in advanced RAG architectures.",
+    "advanced RAG architectures summarization",
+    "key techniques in RAG",
+    "techniques for advanced RAG"
+  ],
+  "who proposed the transformer architecture in 'attention is all you need'?": [
+    "Who proposed the transformer architecture in 'Attention Is All You Need'?",
+    "transformer architecture proposal",
+    "attention is all you need' authors",
+    "paper attention is all you need publication year"
+  ],
+  "what is autogen and how does it support multi-agent conversations?": [
+    "What is AutoGen and how does it support multi-agent conversations?",
+    "autogen multi-agent conversation framework",
+    "autogen conversational agent architecture",
+    "autogen dialogue management techniques"
+  ],
+  "describe the camel framework for role-playing agents.": [
+    "Describe the CAMEL framework for role-playing agents.",
+    "CAMEL framework role-playing agents",
+    "CAMEL architecture agent-based systems",
+    "CAMEL mechanism adaptive roles"
+  ],
+  "how does metagpt structure multi-agent collaboration like a software company?": [
+    "How does MetaGPT structure multi-agent collaboration like a software company?",
+    "MetaGPT multi-agent collaboration architecture",
+    "MetaGPT multi-agent system design",
+    "software company approach to multi-agent coordination"
+  ],
+  "what is voyager and how does it enable open-ended exploration in minecraft?": [
+    "What is Voyager and how does it enable open-ended exploration in Minecraft?",
+    "Voyager Minecraft open-ended exploration",
+    "Voyager Minecraft world generation",
+    "Voyager Minecraft player interaction"
+  ],
+  "compare autogen and camel approaches to multi-agent orchestration.": [
+    "Compare AutoGen and CAMEL approaches to multi-agent orchestration.",
+    "AutoGen vs CAMEL multi-agent orchestration",
+    "multi-agent system comparison AutoGen CAMEL",
+    "CAMEL AutoGen architecture differences"
+  ],
+  "why is flash attention faster than standard attention?": [
+    "Why is Flash Attention faster than standard attention?",
+    "flash attention algorithm",
+    "standard attention computational complexity",
+    "performance comparison flash attention standard attention"
+  ],
+  "describe the llama model architecture.": [
+    "Describe the LLaMA model architecture.",
+    "LLaMA model architecture",
+    "LLaMA transformer layers",
+    "LLaMA attention mechanism"
+  ],
+  "what is lora and how does it enable parameter-efficient fine-tuning?": [
+    "What is LoRA and how does it enable parameter-efficient fine-tuning?",
+    "LoRA parameter efficient fine-tuning",
+    "low-rank adaptation fine-tuning",
+    "efficient fine-tuning low-rank approximation"
+  ],
+  "how does qlora reduce memory usage compared to lora?": [
+    "How does QLoRA reduce memory usage compared to LoRA?",
+    "QLoRA memory efficiency",
+    "memory reduction QLoRA vs LoRA",
+    "LoRA and QLoRA memory comparison"
+  ],
+  "compare lora and qlora fine-tuning approaches.": [
+    "Compare LoRA and QLoRA fine-tuning approaches.",
+    "LoRA fine-tuning",
+    "QLoRA fine-tuning",
+    "difference between LoRA and QLoRA"
+  ],
+  "where in the transformer architecture is self-attention applied?": [
+    "Where in the transformer architecture is self-attention applied?",
+    "transformer self-attention layer",
+    "position-wise feed-forward network placement",
+    "encoder self-attention mechanism location"
+  ],
+  "what is ragas and what does it measure?": [
+    "What is RAGAS and what does it measure?",
+    "ragas evaluation metrics",
+    "retrieval augmentation generation assessment score",
+    "model performance metrics ragas"
+  ],
+  "how does phoenix support llm evaluation and observability?": [
+    "How does Phoenix support LLM evaluation and observability?",
+    "Phoenix LLM evaluation framework",
+    "Phoenix observability metrics",
+    "Phoenix LLM performance monitoring"
+  ],
+  "what is ragops and how does it differ from traditional mlops?": [
+    "What is RAGOps and how does it differ from traditional MLOps?",
+    "RAGOps definition",
+    "RAGOps vs MLOps",
+    "retrieval augmented generative MLOps"
+  ],
+  "describe the llm agent mlops lifecycle.": [
+    "Describe the LLM Agent MLOps lifecycle.",
+    "llm agent mlops workflow",
+    "llm model deployment pipeline",
+    "llm operationalization process"
+  ],
+  "what is llama-duo and what problem does it solve?": [
+    "What is LLaMA-Duo and what problem does it solve?",
+    "llama-duo architecture",
+    "llama-duo model comparison",
+    "llama-duo use cases"
+  ],
+  "how can maximizing user experience metrics guide llm product decisions?": [
+    "How can maximizing user experience metrics guide LLM product decisions?",
+    "maximizing user experience metrics in LLM design",
+    "LLM product development user experience focus",
+    "user experience metrics impact on LLM decision making"
+  ],
+  "what is pagedattention and how does it optimize memory in vllm?": [
+    "What is PagedAttention and how does it optimize memory in vLLM?",
+    "PagedAttention vLLM optimization",
+    "memory efficient PagedAttention vLLM",
+    "attention mechanism paged implementation vLLM"
+  ],
+  "how does speculative decoding speed up llm inference?": [
+    "How does speculative decoding speed up LLM inference?",
+    "speculative decoding acceleration llm",
+    "predictive decoding llm inference",
+    "asynchronous decoding llm performance"
+  ],
+  "describe how vllm serves large language models efficiently.": [
+    "Describe how vLLM serves large language models efficiently.",
+    "vLLM efficient scheduling",
+    "vLLM tensor parallelism",
+    "vLLM memory optimization"
+  ],
+  "what is langgraph and what problem does it solve?": [
+    "What is LangGraph and what problem does it solve?",
+    "LangGraph architecture",
+    "LangGraph use cases",
+    "LangGraph performance metrics"
+  ],
+  "how do checkpointers work in langgraph?": [
+    "How do checkpointers work in LangGraph?",
+    "checkpointing mechanism langgraph",
+    "checkpointing strategy distributed training",
+    "recovery points langgraph"
+  ],
+  "describe how persistence works across langgraph runs.": [
+    "Describe how persistence works across LangGraph runs.",
+    "LangGraph persistence mechanism",
+    "LangGraph run-to-run state retention",
+    "LangGraph session persistence"
+  ],
+  "how does langgraph support human-in-the-loop workflows?": [
+    "How does LangGraph support human-in-the-loop workflows?",
+    "LangGraph human-in-the-loop",
+    "human-in-the-loop interaction LangGraph",
+    "LangGraph interactive retrieval"
+  ],
+  "what is memory in langgraph and how is it implemented?": [
+    "What is memory in LangGraph and how is it implemented?",
+    "memory mechanism langgraph",
+    "implementation details langgraph memory",
+    "langgraph memory architecture"
+  ],
+  "how do you use subgraphs in langgraph?": [
+    "How do you use subgraphs in LangGraph?",
+    "subgraph usage langgraph",
+    "langgraph subgraph implementation",
+    "subgraph querying langgraph"
+  ],
+  "compare workflow-based and agent-based design patterns in langgraph.": [
+    "Compare workflow-based and agent-based design patterns in LangGraph.",
+    "workflow-based design pattern LangGraph",
+    "agent-based design pattern LangGraph",
+    "comparison workflow agent design patterns LangGraph"
   ],
   "what is the capital of france?": [
-    "What is the capital of France?"
+    "What is the capital of France?",
+    "capital of france"
   ],
-  "react": [
-    "ReAct",
-    "reactive learning",
-    "reactive artificial intelligence",
-    "act-reaction model"
+  "how do i bake a chocolate cake?": [
+    "How do I bake a chocolate cake?",
+    "chocolate cake baking recipe",
+    "chocolate cake preparation steps",
+    "baking process of chocolate cake"
   ],
-  "what is react": [
-    "What is ReAct",
-    "ReAct method",
-    "ReAct algorithm details",
-    "ReAct implementation overview"
+  "what is the current stock price of apple?": [
+    "What is the current stock price of Apple?",
+    "apple inc stock price",
+    "aapl current market value",
+    "latest apple stock quote"
   ],
-  "who invented the transformer architecture?": [
-    "Who invented the transformer architecture?",
-    "transformer architecture inventor",
-    "history of transformer architecture",
-    "who created the transformer model"
+  "who won the fifa world cup in 2022?": [
+    "Who won the FIFA World Cup in 2022?",
+    "fifa world cup 2022 winner",
+    "2022 fifa world cup champion",
+    "winner of 2022 fifa world cup"
   ],
-  "what is react prompting framework for llm agents?": [
-    "What is ReAct prompting framework for LLM agents?",
-    "ReAct prompting framework technical details",
-    "LLM agent interaction mechanisms ReAct",
-    "ReAct prompt engineering for LLMs"
+  "what is the boiling point of water at sea level?": [
+    "What is the boiling point of water at sea level?",
+    "water boiling point sea level",
+    "standard atmospheric pressure water boiling",
+    "boiling point H2O sea level"
   ],
-  "what is the react prompting framework for llm agents?": [
-    "What is the ReAct prompting framework for LLM agents?",
-    "react prompting framework llm",
-    "act prompt mechanism react",
-    "react prompting in llm context"
+  "how do i file taxes in germany?": [
+    "How do I file taxes in Germany?",
+    "tax filing process germany",
+    "german tax system overview",
+    "deutsche steuererklärung procedure"
   ],
-  "react prompting framework for llm agents": [
-    "ReAct prompting framework for LLM agents",
-    "ReAct prompting framework technical details",
-    "LLM agent interaction with ReAct prompting",
-    "ReAct prompting mechanism in LLM agents"
+  "what is the plot of the movie inception?": [
+    "What is the plot of the movie Inception?",
+    "inception movie plot",
+    "inception narrative structure",
+    "christopher nolan inception storyline"
   ],
-  "what is langgraph?": [
-    "What is LangGraph?",
-    "langgraph architecture",
-    "LangGraph model details",
-    "LangGraph neural network"
-  ],
-  "what is langchain?": [
-    "What is LangChain?",
-    "langchain overview",
-    "langchain architecture components",
-    "langchain technical specifications"
-  ],
-  "what is faiss index?": [
-    "What is faiss index?",
-    "faiss indexing methods",
-    "faiss vector database",
-    "faiss index structure"
-  ],
-  "what are multi agent systems?": [
-    "What are multi agent systems?",
-    "multi-agent-systems-architecture",
-    "multi-agent-systems-algorithms",
-    "multi-agent-systems-research-papers"
-  ],
-  "what is rag?": [
-    "What is RAG?",
-    "RAG technical definition",
-    "RAG in natural language processing",
-    "RAG architecture components"
-  ],
-  "what are multi agent systems": [
-    "what are multi agent systems",
-    "multi-agent-systems-techniques",
-    "multiagent-systems-algorithms",
-    "multiagent-systems-research"
-  ],
-  "what is dense and sparse retrieval?": [
-    "What is dense and sparse retrieval?",
-    "dense retrieval vs sparse retrieval",
-    "sparse vector space model",
-    "embedding similarity search"
-  ],
-  "what is react in llm agents?": [
-    "What is ReAct in LLM agents?",
-    "ReAct LLM agents",
-    "React framework LLM",
-    "reinforcement learning with actication LLM"
-  ],
-  "what is rag": [
-    "what is RAG",
-    "retrieval augmented generation",
-    "RAG architecture",
-    "RAG framework overview"
-  ],
-  "what is rag in llms": [
-    "what is RAG in LLMs",
-    "RAG architecture llm",
-    "retrieval augmented generation llm",
-    "integrating retrieval with llms"
-  ],
-  "what is rag in llms?": [
-    "What is RAG in LLMs?",
-    "rag architecture llm",
-    "retrieval augmented generation llm",
-    "integrating retrieval with llms"
-  ],
-  "what is react agent in llm?": [
-    "What is ReAct agent in LLM?",
-    "react agent llm",
-    "reinforcement learning with human feedback react",
-    "llm reactive planning"
+  "how does photosynthesis work in plants?": [
+    "How does photosynthesis work in plants?",
+    "photosynthetic process in plants",
+    "chlorophyll absorption spectrum",
+    "light-dependent reactions of photosynthesis"
   ]
 }
