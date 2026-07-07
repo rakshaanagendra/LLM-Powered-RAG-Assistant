@@ -1,11 +1,17 @@
 import re
+from pathlib import Path
+
 import ollama
+
+from caching.cache_manager import CacheManager
 
 
 class QueryRewriter:
     def __init__(self, model_name="qwen2.5:7b", client=None):
         self.model_name = model_name
         self.client = client
+        cache_file = Path(__file__).resolve().parents[1] / "caching" / "query_rewrite_cache.json"
+        self.cache = CacheManager(cache_file)
 
     def _clean_text(self, text):
         text = text.strip()
@@ -18,6 +24,11 @@ class QueryRewriter:
 
     def rewrite(self, query):
         query = self._clean_text(query)
+
+        cache_key = query.lower().strip()
+        cached = self.cache.get(cache_key)
+        if cached is not None:
+            return cached
 
         prompt = f"""
 You are an expert retrieval query optimizer for RAG systems.
@@ -57,6 +68,9 @@ User Query:
                             "content": prompt,
                         },
                     ],
+                    options={
+                        "temperature": 0.0,
+                    },
                 )
             else:
                 response = self.client.chat(
@@ -71,6 +85,9 @@ User Query:
                             "content": prompt,
                         },
                     ],
+                    options={
+                        "temperature": 0.0,
+                    },
                 )
 
             rewritten_query = response["message"]["content"]
@@ -79,6 +96,7 @@ User Query:
             if not rewritten_query:
                 return self._fallback_rewrite(query)
 
+            self.cache.set(cache_key, rewritten_query)
             return rewritten_query
 
         except Exception:

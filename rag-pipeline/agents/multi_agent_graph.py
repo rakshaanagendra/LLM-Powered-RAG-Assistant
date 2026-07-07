@@ -15,6 +15,15 @@ from agents.research_node import research_node
 from agents.writer_node import writer_node
 from agents.critic_node import critic_node
 
+MAX_RETRIES = 1
+
+def route_after_critic(state: MultiAgentState) -> str:
+    if state.get("answer_grounded"):
+        return "end"
+    if state.get("retry_count", 0) > MAX_RETRIES:
+        return "end"
+    return "retry"
+
 # -----------------------------------------------------------------------
 # Graph construction
 # -----------------------------------------------------------------------
@@ -29,8 +38,11 @@ graph_builder.add_node("critic_node", critic_node)
 graph_builder.add_edge(START, "research_node")
 graph_builder.add_edge("research_node", "writer_node")
 graph_builder.add_edge("writer_node", "critic_node")
-graph_builder.add_edge("critic_node", END)
-
+graph_builder.add_conditional_edges(
+    "critic_node",
+    route_after_critic,
+    {"retry": "writer_node", "end": END}
+)
 # Compile — no checkpointer needed, outer graph is stateless
 # Memory is handled at the research_node level via uuid thread_id
 graph = graph_builder.compile()
@@ -51,6 +63,7 @@ if __name__ == "__main__":
     print("\nAction:", result["action"])
     print("\nFinal Answer:", result["final_answer"])
     print("\nAnswer Grounded:", result["answer_grounded"])
+    print("\n Retry Count:",result["retry_count"])
     print("\nCritique:", result["critique"])
     print("\nAgent Log:")
     for entry in result["agent_log"]:

@@ -193,6 +193,7 @@ if __name__ == "__main__":
         "critique": "",
         "final_answer": "",
         "answer_grounded": False,
+        "retry_count": 0,
         "node_latencies": {},
         "agent_log": []
     }

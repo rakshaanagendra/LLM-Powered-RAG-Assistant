@@ -172,6 +172,19 @@ class Retriever:
         return False
 
     def _filter_candidates(self, chunks, max_per_source: Optional[int] = 3):
+    # NEW: sort by score first, so the cap keeps the BEST chunks per source,
+    # not just whichever chunks happened to appear first in the list
+        def _get_score(chunk):
+            if "rrf_score" in chunk:
+                return chunk["rrf_score"]
+            if "cosine_score" in chunk:
+                return chunk["cosine_score"]
+            if "bm25_score" in chunk:
+                return chunk["bm25_score"]
+            return 0.0
+        
+        chunks = sorted(chunks, key=_get_score, reverse=True)
+
         filtered = []
         per_source_counts = {}
 

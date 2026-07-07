@@ -30,6 +30,7 @@ class MultiAgentState(TypedDict):
     critique: str
     final_answer: str
     answer_grounded: bool
+    retry_count:int
 
     # Observability — appends across agents, never overwrites
     agent_log: Annotated[list[str], operator.add]

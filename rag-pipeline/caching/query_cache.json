@@ -308,5 +308,11 @@
     "photosynthetic process in plants",
     "chlorophyll absorption spectrum",
     "light-dependent reactions of photosynthesis"
+  ],
+  "react prompting framework for llm agents": [
+    "ReAct prompting framework for LLM agents",
+    "ReAct prompting framework",
+    "LLM agent ReAct",
+    "reactive reasoning LLM"
   ]
 }

@@ -1763,7 +1763,6 @@ class MultiQueryHybridRetriever:
         self,
         query,
         probe_k: int = 5,
-        overlap_threshold: float = 0.08,
     ):
         """
         Lightweight pre-retrieval gate.
@@ -1841,7 +1840,7 @@ class MultiQueryHybridRetriever:
 
         combined_fit = 0.85 * best_score + 0.15 * best_overlap
 
-        if combined_fit >= 0.45:
+        if combined_fit >= 0.605:
             return {
                 "is_ood": False,
                 "confidence": "high" if combined_fit >= 0.70 else "medium",
@@ -3179,7 +3178,7 @@ if __name__ == "__main__":
             # "What is QLoRA?",
             # "What is FlashAttention?",
             # "What is dense and sparse retrieval?",
-             "What is the ReAct framework?",
+            #  "What is the ReAct framework?",
 
 
             # # WHO / WHEN / WHERE

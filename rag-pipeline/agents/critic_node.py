@@ -110,9 +110,14 @@ Now evaluate whether the final answer is grounded in the research context."""
         f"Latency: {node_latency_ms}ms"
     )
 
+    retry_count=state.get("retry_count",0)
+    if not answer_grounded:
+        retry_count+=1
+
     return {
         "answer_grounded": answer_grounded,
         "critique": critique,
+        "retry_count":retry_count,
         "node_latencies": {"critic_node": node_latency_ms},
         "agent_log": [log_entry]
     }
@@ -141,6 +146,7 @@ if __name__ == "__main__":
         "retrieval_strategy": "dense",
         "critique": "",
         "answer_grounded": False,
+        "retry_count": 0,
         "node_latencies": {},
         "agent_log": []
     })
