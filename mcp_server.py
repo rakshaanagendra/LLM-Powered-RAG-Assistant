@@ -1,7 +1,4 @@
 import os
-os.environ["LANGSMITH_MULTIPART_INGEST"] = "false"
-os.environ["LANGCHAIN_MULTIPART_INGEST"] = "false"
-
 from dotenv import load_dotenv
 load_dotenv()
 

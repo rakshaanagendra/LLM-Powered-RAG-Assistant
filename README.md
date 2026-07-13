@@ -288,14 +288,8 @@ Without an explicit reducer, LangGraph overwrites dict fields on each node updat
 
 - **MLflow**: Full experiment tracking operational — latency, confidence, 
   grounding rate, per-node metrics logged per request.
-  
-- **LangSmith**: Tracing configured via `@traceable` decorators on all three 
-  agent nodes (research, writer, critic). Blocked by free tier restriction on 
-  `/runs/multipart` ingestion endpoint. Will activate on paid plan or when 
-  free tier access is restored.
 - MCP server integration wrapping the FastAPI endpoint
 - Domain gate threshold tuning with a retrieval evaluation set
-- LangSmith tracing alongside MLflow
 - Streaming responses via FastAPI `StreamingResponse` + LangGraph `.astream()`
 - Observability dashboard
 

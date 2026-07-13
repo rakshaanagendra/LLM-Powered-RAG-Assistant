@@ -1,7 +1,3 @@
-import os
-os.environ["LANGSMITH_MULTIPART_INGEST"] = "false"
-os.environ["LANGCHAIN_MULTIPART_INGEST"] = "false"
-
 import json
 from fastapi.responses import StreamingResponse
 from typing import Generator

@@ -7,7 +7,6 @@ from pathlib import Path
 from dotenv import load_dotenv
 from langchain_core.messages import ToolMessage
 from langchain_core.runnables import RunnableConfig
-from langsmith import traceable
 
 load_dotenv()
 
@@ -50,11 +49,6 @@ def extract_tool_output(messages: list) -> dict:
 # -----------------------------------------------------------------------
 # Research Node
 # -----------------------------------------------------------------------
-@traceable(
-    name="research_node",
-    metadata={"node_type": "retrieval"}
-)
-
 def research_node(state: MultiAgentState) -> dict:
     """
     Wraps the existing rag_agent graph as a research node.

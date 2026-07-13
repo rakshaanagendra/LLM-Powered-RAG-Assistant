@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Optional
 from langchain_groq import ChatGroq
 from langchain_core.messages import SystemMessage, HumanMessage
-from langsmith import traceable
 from langchain_core.runnables import RunnableConfig
 
 # -----------------------------------------------------------------------
@@ -62,10 +61,6 @@ Rules:
 # -----------------------------------------------------------------------
 # Writer Node
 # -----------------------------------------------------------------------
-@traceable(
-    name="writer_node",
-    metadata={"node_type": "generation"}
-)
 def writer_node(state: MultiAgentState, config: Optional[RunnableConfig] = None) -> dict:
     # Read stream_mode from config if provided
     stream_mode = False

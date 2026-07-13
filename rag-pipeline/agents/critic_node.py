@@ -5,7 +5,6 @@ import time
 from pathlib import Path
 from langchain_groq import ChatGroq
 from langchain_core.messages import SystemMessage, HumanMessage
-from langsmith import traceable
 
 # -----------------------------------------------------------------------
 # Path setup
@@ -42,11 +41,6 @@ Respond ONLY with this exact JSON format, no other text, no markdown:
 # -----------------------------------------------------------------------
 # Critic Node
 # -----------------------------------------------------------------------
-@traceable(
-        name="critic_node",
-        metadata={"node_type": "evaluation"}
-)
-
 def critic_node(state: MultiAgentState) -> dict:
     """
     Validates whether final_answer is grounded in research_context.
