@@ -16,7 +16,12 @@ rag-pipeline/Scripts/
 rag-pipeline/Include/
 rag-pipeline/share/
 rag-pipeline/etc/
-rag-pipeline/evaluation/
+rag-pipeline/caching/query_cache.json
+rag-pipeline/caching/query_rewrite_cache.json
+rag-pipeline/caching/retrieval_cache.json
+rag-pipeline/observability/query_metrics.jsonl
+
+
 
 # Jupyter
 .ipynb_checkpoints/
@@ -56,8 +61,6 @@ data/queries/
 # Ollama
 ollama.log
 
-# Evaluation Outputs
-
 # Temporary Files
 temp/
 tmp/
@@ -80,7 +83,6 @@ commands.txt
 
 mlflow.db
 
-test_langsmith.py
 test_mcp.py
 
 #Note: `rag/` and `rag-pipeline/Lib`, `rag-pipeline/Scripts`, and related 
