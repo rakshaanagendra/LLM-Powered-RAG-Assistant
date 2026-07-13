@@ -1,0 +1,1294 @@
+[
+  {
+    "query_id": "q001",
+    "query": "What is the ReAct framework?",
+    "query_type": "what-is",
+    "expected_sources": [
+      "agents/REACT"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "agents/Reflexion",
+      "rag/original_rag",
+      "llmops/maximizing_user_exp",
+      "multi_agent/meta_gpt",
+      "rag/advanced-rag"
+    ],
+    "mrr": 0.0,
+    "recall_at_5": 0.0,
+    "precision_at_5": 0.0,
+    "hit_at_3": false,
+    "hit_at_5": false,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.7397
+  },
+  {
+    "query_id": "q002",
+    "query": "How does Toolformer enable a model to use tools?",
+    "query_type": "how-to",
+    "expected_sources": [
+      "agents/Toolformer"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "agents/Toolformer",
+      "agents/Toolformer",
+      "agents/Toolformer",
+      "rag/original_rag",
+      "multi_agent/meta_gpt"
+    ],
+    "mrr": 1.0,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.748
+  },
+  {
+    "query_id": "q003",
+    "query": "Compare ReAct and Reflexion approaches to agent reasoning.",
+    "query_type": "compare",
+    "expected_sources": [
+      "agents/REACT",
+      "agents/Reflexion"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "agents/REACT",
+      "multi_agent/voyager",
+      "agents/Reflexion",
+      "multi_agent/voyager",
+      "multi_agent/voyager"
+    ],
+    "mrr": 1.0,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.4,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.7854
+  },
+  {
+    "query_id": "q004",
+    "query": "Describe how Tree of Thoughts differs from standard chain-of-thought reasoning.",
+    "query_type": "describe",
+    "expected_sources": [
+      "agents/Tree_of_thoughts"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "agents/REACT",
+      "agents/Tree_of_thoughts",
+      "agents/Tree_of_thoughts",
+      "agents/Tree_of_thoughts",
+      "agents/Graph_of_thoughts"
+    ],
+    "mrr": 0.5,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.771
+  },
+  {
+    "query_id": "q005",
+    "query": "Summarize the Plan-and-Solve prompting strategy.",
+    "query_type": "summarize",
+    "expected_sources": [
+      "agents/Plan_and_solve"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "agents/Plan_and_solve",
+      "agents/Plan_and_solve",
+      "langgraph/memory",
+      "agents/REACT",
+      "agents/Plan_and_solve"
+    ],
+    "mrr": 1.0,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.7875
+  },
+  {
+    "query_id": "q006",
+    "query": "What is Graph of Thoughts and how does it extend tree-based reasoning?",
+    "query_type": "what-is",
+    "expected_sources": [
+      "agents/Graph_of_thoughts"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "agents/Graph_of_thoughts",
+      "agents/Graph_of_thoughts",
+      "agents/Tree_of_thoughts",
+      "agents/Tree_of_thoughts",
+      "agents/Plan_and_solve"
+    ],
+    "mrr": 1.0,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.8338
+  },
+  {
+    "query_id": "q007",
+    "query": "How does Self-Challenging improve an agent's reasoning ability?",
+    "query_type": "how-to",
+    "expected_sources": [
+      "agents/Self_challenging"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "agents/Self_challenging",
+      "agents/Tree_of_thoughts",
+      "rag/attention_is_all_you_need",
+      "multi_agent/camel",
+      "agents/Tree_of_thoughts"
+    ],
+    "mrr": 1.0,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.7582
+  },
+  {
+    "query_id": "q008",
+    "query": "What is Retrieval-Augmented Generation?",
+    "query_type": "what-is",
+    "expected_sources": [
+      "rag/original_rag"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "rag/self_rag",
+      "llmops/ragas",
+      "rag/advanced-rag",
+      "rag/corrective_rag",
+      "rag/lostinmiddle"
+    ],
+    "mrr": 0.0,
+    "recall_at_5": 0.0,
+    "precision_at_5": 0.0,
+    "hit_at_3": false,
+    "hit_at_5": false,
+    "confidence": "high",
+    "action": "generate",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.894
+  },
+  {
+    "query_id": "q009",
+    "query": "How does ColBERT differ from standard dense retrieval?",
+    "query_type": "how-to",
+    "expected_sources": [
+      "rag/colBert"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "rag/splade",
+      "rag/colBert",
+      "rag/faiss_library",
+      "rag/original_rag",
+      "rag/splade"
+    ],
+    "mrr": 0.5,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.7615
+  },
+  {
+    "query_id": "q010",
+    "query": "What is Corrective RAG and when is it triggered?",
+    "query_type": "what-is",
+    "expected_sources": [
+      "rag/corrective_rag"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "rag/corrective_rag",
+      "rag/corrective_rag",
+      "rag/corrective_rag",
+      "llmops/ragops",
+      "multi_agent/AutoGen"
+    ],
+    "mrr": 1.0,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.7941
+  },
+  {
+    "query_id": "q011",
+    "query": "Describe how Self-RAG decides when to retrieve.",
+    "query_type": "describe",
+    "expected_sources": [
+      "rag/self_rag"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "rag/self_rag",
+      "rag/self_rag",
+      "rag/self_rag",
+      "rag/corrective_rag",
+      "llmops/ragas"
+    ],
+    "mrr": 1.0,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.831
+  },
+  {
+    "query_id": "q012",
+    "query": "Compare Self-RAG and Corrective RAG.",
+    "query_type": "compare",
+    "expected_sources": [
+      "rag/self_rag",
+      "rag/corrective_rag"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "rag/corrective_rag",
+      "rag/self_rag",
+      "rag/self_rag",
+      "rag/self_rag",
+      "llmops/ragops"
+    ],
+    "mrr": 1.0,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.4,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.8142
+  },
+  {
+    "query_id": "q013",
+    "query": "Why does the 'lost in the middle' problem occur in long-context LLMs?",
+    "query_type": "why",
+    "expected_sources": [
+      "rag/lostinmiddle"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "rag/advanced-rag",
+      "rag/lostinmiddle",
+      "langgraph/memory",
+      "llmops/ragas",
+      "llm_engineering/flash_attention"
+    ],
+    "mrr": 0.5,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.779
+  },
+  {
+    "query_id": "q014",
+    "query": "How does FAISS perform approximate nearest neighbor search?",
+    "query_type": "how-to",
+    "expected_sources": [
+      "rag/faiss_library"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "rag/original_rag",
+      "rag/faiss_library",
+      "rag/colBert",
+      "rag/splade",
+      "multi_agent/camel"
+    ],
+    "mrr": 0.5,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.8256
+  },
+  {
+    "query_id": "q015",
+    "query": "What is SPLADE and how does it combine sparse and dense retrieval?",
+    "query_type": "what-is",
+    "expected_sources": [
+      "rag/splade"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "rag/splade",
+      "rag/splade",
+      "rag/splade",
+      "rag/corrective_rag",
+      "llm_engineering/flash_attention"
+    ],
+    "mrr": 1.0,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.8857
+  },
+  {
+    "query_id": "q016",
+    "query": "Summarize the key techniques covered in advanced RAG architectures.",
+    "query_type": "summarize",
+    "expected_sources": [
+      "rag/advanced-rag"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "rag/advanced-rag",
+      "llmops/ragops",
+      "rag/advanced-rag",
+      "rag/advanced-rag",
+      "llmops/ragops"
+    ],
+    "mrr": 1.0,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.7367
+  },
+  {
+    "query_id": "q017",
+    "query": "Who proposed the transformer architecture in 'Attention Is All You Need'?",
+    "query_type": "who",
+    "expected_sources": [
+      "rag/attention_is_all_you_need",
+      "llm_engineering/attention_is_all_you_need"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [],
+    "mrr": 0.0,
+    "recall_at_5": 0.0,
+    "precision_at_5": 0.0,
+    "hit_at_3": false,
+    "hit_at_5": false,
+    "confidence": "low",
+    "action": "retry_or_abstain",
+    "is_ood_predicted": true,
+    "can_answer": false,
+    "combined_fit": 0.5819
+  },
+  {
+    "query_id": "q018",
+    "query": "What is AutoGen and how does it support multi-agent conversations?",
+    "query_type": "what-is",
+    "expected_sources": [
+      "multi_agent/AutoGen"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "multi_agent/AutoGen",
+      "multi_agent/AutoGen",
+      "multi_agent/AutoGen",
+      "llmops/llm_agent_mlops",
+      "multi_agent/camel"
+    ],
+    "mrr": 1.0,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.9321
+  },
+  {
+    "query_id": "q019",
+    "query": "Describe the CAMEL framework for role-playing agents.",
+    "query_type": "describe",
+    "expected_sources": [
+      "multi_agent/camel"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "multi_agent/AutoGen",
+      "multi_agent/camel",
+      "multi_agent/camel",
+      "multi_agent/camel",
+      "llmops/maximizing_user_exp"
+    ],
+    "mrr": 0.5,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.8619
+  },
+  {
+    "query_id": "q020",
+    "query": "How does MetaGPT structure multi-agent collaboration like a software company?",
+    "query_type": "how-to",
+    "expected_sources": [
+      "multi_agent/meta_gpt"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "multi_agent/meta_gpt",
+      "multi_agent/meta_gpt",
+      "multi_agent/meta_gpt",
+      "multi_agent/AutoGen",
+      "llmops/llm_agent_mlops"
+    ],
+    "mrr": 1.0,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.8314
+  },
+  {
+    "query_id": "q021",
+    "query": "What is Voyager and how does it enable open-ended exploration in Minecraft?",
+    "query_type": "what-is",
+    "expected_sources": [
+      "multi_agent/voyager"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "multi_agent/voyager",
+      "multi_agent/AutoGen",
+      "multi_agent/voyager",
+      "multi_agent/AutoGen",
+      "multi_agent/meta_gpt"
+    ],
+    "mrr": 1.0,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.8195
+  },
+  {
+    "query_id": "q022",
+    "query": "Compare AutoGen and CAMEL approaches to multi-agent orchestration.",
+    "query_type": "compare",
+    "expected_sources": [
+      "multi_agent/AutoGen",
+      "multi_agent/camel"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "multi_agent/AutoGen",
+      "multi_agent/AutoGen",
+      "llmops/llm_agent_mlops",
+      "multi_agent/AutoGen",
+      "agents/Reflexion"
+    ],
+    "mrr": 1.0,
+    "recall_at_5": 0.5,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.8044
+  },
+  {
+    "query_id": "q023",
+    "query": "Why is Flash Attention faster than standard attention?",
+    "query_type": "why",
+    "expected_sources": [
+      "llm_engineering/flash_attention"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "llm_engineering/flash_attention",
+      "llm_engineering/flash_attention",
+      "llm_engineering/flash_attention",
+      "llm_engineering/attention_is_all_you_need",
+      "rag/attention_is_all_you_need"
+    ],
+    "mrr": 1.0,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.7672
+  },
+  {
+    "query_id": "q024",
+    "query": "Describe the LLaMA model architecture.",
+    "query_type": "describe",
+    "expected_sources": [
+      "llm_engineering/llama"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "deployment/paged_attention",
+      "rag/attention_is_all_you_need",
+      "agents/Graph_of_thoughts",
+      "llm_engineering/phoenix_eval",
+      "llmops/llama_duo"
+    ],
+    "mrr": 0.0,
+    "recall_at_5": 0.0,
+    "precision_at_5": 0.0,
+    "hit_at_3": false,
+    "hit_at_5": false,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.7699
+  },
+  {
+    "query_id": "q025",
+    "query": "What is LoRA and how does it enable parameter-efficient fine-tuning?",
+    "query_type": "what-is",
+    "expected_sources": [
+      "llm_engineering/lora"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "llm_engineering/qlora",
+      "llm_engineering/qlora",
+      "llm_engineering/lora",
+      "llm_engineering/lora",
+      "llmops/llama_duo"
+    ],
+    "mrr": 0.3333,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.8153
+  },
+  {
+    "query_id": "q026",
+    "query": "How does QLoRA reduce memory usage compared to LoRA?",
+    "query_type": "how-to",
+    "expected_sources": [
+      "llm_engineering/qlora"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "llm_engineering/qlora",
+      "rag/attention_is_all_you_need",
+      "llm_engineering/flash_attention",
+      "rag/attention_is_all_you_need",
+      "deployment/vllm"
+    ],
+    "mrr": 1.0,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.8167
+  },
+  {
+    "query_id": "q027",
+    "query": "Compare LoRA and QLoRA fine-tuning approaches.",
+    "query_type": "compare",
+    "expected_sources": [
+      "llm_engineering/lora",
+      "llm_engineering/qlora"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "llm_engineering/qlora",
+      "llm_engineering/qlora",
+      "llmops/llama_duo",
+      "llm_engineering/flash_attention",
+      "llmops/llama_duo"
+    ],
+    "mrr": 1.0,
+    "recall_at_5": 0.5,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.7775
+  },
+  {
+    "query_id": "q044",
+    "query": "Where in the transformer architecture is self-attention applied?",
+    "query_type": "where",
+    "expected_sources": [
+      "rag/attention_is_all_you_need"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "rag/attention_is_all_you_need",
+      "rag/attention_is_all_you_need",
+      "deployment/vllm",
+      "rag/attention_is_all_you_need",
+      "llm_engineering/lora"
+    ],
+    "mrr": 1.0,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.7745
+  },
+  {
+    "query_id": "q028",
+    "query": "What is RAGAS and what does it measure?",
+    "query_type": "what-is",
+    "expected_sources": [
+      "llmops/ragas"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "llmops/ragas",
+      "llmops/ragops",
+      "llmops/ragas",
+      "rag/advanced-rag",
+      "llmops/ragops"
+    ],
+    "mrr": 1.0,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.719
+  },
+  {
+    "query_id": "q029",
+    "query": "How does Phoenix support LLM evaluation and observability?",
+    "query_type": "how-to",
+    "expected_sources": [],
+    "corpus_gap": true,
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "llmops/ragops",
+      "llmops/llm_agent_mlops",
+      "rag/advanced-rag",
+      "llm_engineering/phoenix_eval",
+      "llm_engineering/phoenix_eval"
+    ],
+    "mrr": 0.0,
+    "recall_at_5": 0.0,
+    "precision_at_5": 0.0,
+    "hit_at_3": false,
+    "hit_at_5": false,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.7178
+  },
+  {
+    "query_id": "q030",
+    "query": "What is RAGOps and how does it differ from traditional MLOps?",
+    "query_type": "what-is",
+    "expected_sources": [
+      "llmops/ragops"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "llmops/ragops",
+      "llmops/ragops",
+      "deployment/paged_attention",
+      "llmops/maximizing_user_exp",
+      "llm_engineering/attention_is_all_you_need"
+    ],
+    "mrr": 1.0,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.7023
+  },
+  {
+    "query_id": "q031",
+    "query": "Describe the LLM Agent MLOps lifecycle.",
+    "query_type": "describe",
+    "expected_sources": [
+      "llmops/llm_agent_mlops"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "deployment/index_html_",
+      "llmops/ragops",
+      "llmops/maximizing_user_exp",
+      "llmops/llm_agent_mlops",
+      "llmops/maximizing_user_exp"
+    ],
+    "mrr": 0.25,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": false,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.7842
+  },
+  {
+    "query_id": "q032",
+    "query": "What is LLaMA-Duo and what problem does it solve?",
+    "query_type": "what-is",
+    "expected_sources": [
+      "llmops/llama_duo"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "llmops/llama_duo",
+      "llmops/llama_duo",
+      "agents/Self_challenging",
+      "llm_engineering/qlora",
+      "llm_engineering/phoenix_eval"
+    ],
+    "mrr": 1.0,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.6696
+  },
+  {
+    "query_id": "q033",
+    "query": "How can maximizing user experience metrics guide LLM product decisions?",
+    "query_type": "how-to",
+    "expected_sources": [
+      "llmops/maximizing_user_exp"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "rag/colBert",
+      "llmops/maximizing_user_exp",
+      "agents/Reflexion",
+      "llmops/maximizing_user_exp",
+      "agents/Self_challenging"
+    ],
+    "mrr": 0.5,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.7425
+  },
+  {
+    "query_id": "q034",
+    "query": "What is PagedAttention and how does it optimize memory in vLLM?",
+    "query_type": "what-is",
+    "expected_sources": [
+      "deployment/paged_attention"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "deployment/paged_attention",
+      "deployment/vllm",
+      "deployment/paged_attention",
+      "deployment/vllm",
+      "deployment/vllm"
+    ],
+    "mrr": 1.0,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "high",
+    "action": "generate",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.8605
+  },
+  {
+    "query_id": "q035",
+    "query": "How does speculative decoding speed up LLM inference?",
+    "query_type": "how-to",
+    "expected_sources": [
+      "deployment/speculative_decoding"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "deployment/speculative_decoding",
+      "deployment/vllm",
+      "deployment/speculative_decoding",
+      "deployment/speculative_decoding",
+      "agents/Toolformer"
+    ],
+    "mrr": 1.0,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.8217
+  },
+  {
+    "query_id": "q036",
+    "query": "Describe how vLLM serves large language models efficiently.",
+    "query_type": "describe",
+    "expected_sources": [
+      "deployment/vllm"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "deployment/vllm",
+      "deployment/paged_attention",
+      "multi_agent/AutoGen",
+      "deployment/vllm",
+      "rag/splade"
+    ],
+    "mrr": 1.0,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.8271
+  },
+  {
+    "query_id": "q046",
+    "query": "What is LangGraph and what problem does it solve?",
+    "query_type": "what-is",
+    "expected_sources": [
+      "langgraph/overview"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "langgraph/memory",
+      "langgraph/overview",
+      "langgraph/workflows-agents",
+      "langgraph/overview",
+      "langgraph/checkpointers"
+    ],
+    "mrr": 0.5,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.6904
+  },
+  {
+    "query_id": "q047",
+    "query": "How do checkpointers work in LangGraph?",
+    "query_type": "how-to",
+    "expected_sources": [
+      "langgraph/checkpointers"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "rag/splade",
+      "langgraph/human-in-the-loop",
+      "langgraph/checkpointers",
+      "langgraph/checkpointers",
+      "langgraph/use-subgraphs"
+    ],
+    "mrr": 0.3333,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "high",
+    "action": "generate",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.7818
+  },
+  {
+    "query_id": "q048",
+    "query": "Describe how persistence works across LangGraph runs.",
+    "query_type": "describe",
+    "expected_sources": [
+      "langgraph/persistence"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "langgraph/overview",
+      "langgraph/checkpointers",
+      "langgraph/human-in-the-loop",
+      "langgraph/checkpointers",
+      "langgraph/use-subgraphs"
+    ],
+    "mrr": 0.0,
+    "recall_at_5": 0.0,
+    "precision_at_5": 0.0,
+    "hit_at_3": false,
+    "hit_at_5": false,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.7475
+  },
+  {
+    "query_id": "q049",
+    "query": "How does LangGraph support human-in-the-loop workflows?",
+    "query_type": "how-to",
+    "expected_sources": [
+      "langgraph/human-in-the-loop"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "langgraph/overview",
+      "langgraph/checkpointers",
+      "langgraph/workflows-agents",
+      "langgraph/thinking-in-langgraph",
+      "langgraph/workflows-agents"
+    ],
+    "mrr": 0.0,
+    "recall_at_5": 0.0,
+    "precision_at_5": 0.0,
+    "hit_at_3": false,
+    "hit_at_5": false,
+    "confidence": "high",
+    "action": "generate",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.8126
+  },
+  {
+    "query_id": "q050",
+    "query": "What is memory in LangGraph and how is it implemented?",
+    "query_type": "what-is",
+    "expected_sources": [
+      "langgraph/memory"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "langgraph/memory",
+      "langgraph/memory",
+      "langgraph/memory",
+      "langgraph/checkpointers",
+      "langgraph/overview"
+    ],
+    "mrr": 1.0,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "high",
+    "action": "generate",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.8271
+  },
+  {
+    "query_id": "q051",
+    "query": "How do you use subgraphs in LangGraph?",
+    "query_type": "how-to",
+    "expected_sources": [
+      "langgraph/use-subgraphs"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "langgraph/use-subgraphs",
+      "langgraph/use-subgraphs",
+      "langgraph/thinking-in-langgraph",
+      "langgraph/use-subgraphs",
+      "rag/original_rag"
+    ],
+    "mrr": 1.0,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.7991
+  },
+  {
+    "query_id": "q052",
+    "query": "Compare workflow-based and agent-based design patterns in LangGraph.",
+    "query_type": "compare",
+    "expected_sources": [
+      "langgraph/workflows-agents"
+    ],
+    "is_ood_ground_truth": false,
+    "retrieved_sources": [
+      "langgraph/workflows-agents",
+      "agents/Self_challenging",
+      "langgraph/overview",
+      "langgraph/overview",
+      "langgraph/overview"
+    ],
+    "mrr": 1.0,
+    "recall_at_5": 1.0,
+    "precision_at_5": 0.2,
+    "hit_at_3": true,
+    "hit_at_5": true,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.803
+  },
+  {
+    "query_id": "q037",
+    "query": "What is the capital of France?",
+    "query_type": "ood",
+    "expected_sources": [],
+    "is_ood_ground_truth": true,
+    "retrieved_sources": [],
+    "mrr": 0.0,
+    "recall_at_5": 0.0,
+    "precision_at_5": 0.0,
+    "hit_at_3": false,
+    "hit_at_5": false,
+    "confidence": "low",
+    "action": "retry_or_abstain",
+    "is_ood_predicted": true,
+    "can_answer": false,
+    "combined_fit": 0.5503
+  },
+  {
+    "query_id": "q038",
+    "query": "How do I bake a chocolate cake?",
+    "query_type": "ood",
+    "expected_sources": [],
+    "is_ood_ground_truth": true,
+    "retrieved_sources": [],
+    "mrr": 0.0,
+    "recall_at_5": 0.0,
+    "precision_at_5": 0.0,
+    "hit_at_3": false,
+    "hit_at_5": false,
+    "confidence": "low",
+    "action": "retry_or_abstain",
+    "is_ood_predicted": true,
+    "can_answer": false,
+    "combined_fit": 0.5783
+  },
+  {
+    "query_id": "q039",
+    "query": "What is the current stock price of Apple?",
+    "query_type": "ood",
+    "expected_sources": [],
+    "is_ood_ground_truth": true,
+    "retrieved_sources": [
+      "llm_engineering/flash_attention",
+      "agents/Self_challenging",
+      "multi_agent/AutoGen",
+      "multi_agent/camel",
+      "agents/REACT"
+    ],
+    "mrr": 0.0,
+    "recall_at_5": 0.0,
+    "precision_at_5": 0.0,
+    "hit_at_3": false,
+    "hit_at_5": false,
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "is_ood_predicted": false,
+    "can_answer": true,
+    "combined_fit": 0.6793
+  },
+  {
+    "query_id": "q040",
+    "query": "Who won the FIFA World Cup in 2022?",
+    "query_type": "ood",
+    "expected_sources": [],
+    "is_ood_ground_truth": true,
+    "retrieved_sources": [],
+    "mrr": 0.0,
+    "recall_at_5": 0.0,
+    "precision_at_5": 0.0,
+    "hit_at_3": false,
+    "hit_at_5": false,
+    "confidence": "low",
+    "action": "retry_or_abstain",
+    "is_ood_predicted": true,
+    "can_answer": false,
+    "combined_fit": 0.5642
+  },
+  {
+    "query_id": "q041",
+    "query": "What is the boiling point of water at sea level?",
+    "query_type": "ood",
+    "expected_sources": [],
+    "is_ood_ground_truth": true,
+    "retrieved_sources": [],
+    "mrr": 0.0,
+    "recall_at_5": 0.0,
+    "precision_at_5": 0.0,
+    "hit_at_3": false,
+    "hit_at_5": false,
+    "confidence": "low",
+    "action": "retry_or_abstain",
+    "is_ood_predicted": true,
+    "can_answer": false,
+    "combined_fit": 0.5933
+  },
+  {
+    "query_id": "q042",
+    "query": "How do I file taxes in Germany?",
+    "query_type": "ood",
+    "expected_sources": [],
+    "is_ood_ground_truth": true,
+    "retrieved_sources": [],
+    "mrr": 0.0,
+    "recall_at_5": 0.0,
+    "precision_at_5": 0.0,
+    "hit_at_3": false,
+    "hit_at_5": false,
+    "confidence": "low",
+    "action": "retry_or_abstain",
+    "is_ood_predicted": true,
+    "can_answer": false,
+    "combined_fit": 0.5052
+  },
+  {
+    "query_id": "q043",
+    "query": "What is the plot of the movie Inception?",
+    "query_type": "ood",
+    "expected_sources": [],
+    "is_ood_ground_truth": true,
+    "retrieved_sources": [],
+    "mrr": 0.0,
+    "recall_at_5": 0.0,
+    "precision_at_5": 0.0,
+    "hit_at_3": false,
+    "hit_at_5": false,
+    "confidence": "low",
+    "action": "retry_or_abstain",
+    "is_ood_predicted": true,
+    "can_answer": false,
+    "combined_fit": 0.5707
+  },
+  {
+    "query_id": "q045",
+    "query": "How does photosynthesis work in plants?",
+    "query_type": "ood",
+    "expected_sources": [],
+    "is_ood_ground_truth": true,
+    "retrieved_sources": [],
+    "mrr": 0.0,
+    "recall_at_5": 0.0,
+    "precision_at_5": 0.0,
+    "hit_at_3": false,
+    "hit_at_5": false,
+    "confidence": "low",
+    "action": "retry_or_abstain",
+    "is_ood_predicted": true,
+    "can_answer": false,
+    "combined_fit": 0.5314
+  }
+]

@@ -1,0 +1,302 @@
+[
+  {
+    "query_id": "tool001",
+    "query": "Compare ReAct and Reflexion approaches to agent reasoning.",
+    "category": "rag_search",
+    "source_query_id": "q003",
+    "expected_tool": "rag_search",
+    "actual_tool_called": null,
+    "match": null,
+    "notes": ""
+  },
+  {
+    "query_id": "tool002",
+    "query": "What is Graph of Thoughts and how does it extend tree-based reasoning?",
+    "category": "rag_search",
+    "source_query_id": "q006",
+    "expected_tool": "rag_search",
+    "actual_tool_called": null,
+    "match": null,
+    "notes": ""
+  },
+  {
+    "query_id": "tool003",
+    "query": "How does Self-Challenging improve an agent's reasoning ability?",
+    "category": "rag_search",
+    "source_query_id": "q007",
+    "expected_tool": "rag_search",
+    "actual_tool_called": null,
+    "match": null,
+    "notes": ""
+  },
+  {
+    "query_id": "tool004",
+    "query": "Why does the 'lost in the middle' problem occur in long-context LLMs?",
+    "category": "rag_search",
+    "source_query_id": "q013",
+    "expected_tool": "rag_search",
+    "actual_tool_called": null,
+    "match": null,
+    "notes": ""
+  },
+  {
+    "query_id": "tool005",
+    "query": "Who proposed the transformer architecture in 'Attention Is All You Need'?",
+    "category": "rag_search",
+    "source_query_id": "q017",
+    "expected_tool": "rag_search",
+    "actual_tool_called": null,
+    "match": null,
+    "notes": "Ambiguous-boundary case: sounds like general trivia but is answerable from corpus. Also known to be misclassified by the retrieval domain gate (q017) — compare how the tool-selection agent handles it."
+  },
+  {
+    "query_id": "tool006",
+    "query": "Compare AutoGen and CAMEL approaches to multi-agent orchestration.",
+    "category": "rag_search",
+    "source_query_id": "q022",
+    "expected_tool": "rag_search",
+    "actual_tool_called": null,
+    "match": null,
+    "notes": ""
+  },
+  {
+    "query_id": "tool007",
+    "query": "What is PagedAttention and how does it optimize memory in vLLM?",
+    "category": "rag_search",
+    "source_query_id": "q034",
+    "expected_tool": "rag_search",
+    "actual_tool_called": null,
+    "match": null,
+    "notes": ""
+  },
+  {
+    "query_id": "tool008",
+    "query": "Where in the transformer architecture is self-attention applied?",
+    "category": "rag_search",
+    "source_query_id": "q044",
+    "expected_tool": "rag_search",
+    "actual_tool_called": null,
+    "match": null,
+    "notes": ""
+  },
+  {
+    "query_id": "tool009",
+    "query": "What is LangGraph and what problem does it solve?",
+    "category": "rag_search",
+    "source_query_id": "q046",
+    "expected_tool": "rag_search",
+    "actual_tool_called": null,
+    "match": null,
+    "notes": ""
+  },
+  {
+    "query_id": "tool010",
+    "query": "How does LangGraph support human-in-the-loop workflows?",
+    "category": "rag_search",
+    "source_query_id": "q049",
+    "expected_tool": "rag_search",
+    "actual_tool_called": null,
+    "match": null,
+    "notes": ""
+  },
+  {
+    "query_id": "tool011",
+    "query": "What is the capital of France?",
+    "category": "web_search",
+    "source_query_id": "q037",
+    "expected_tool": "none",
+    "actual_tool_called": null,
+    "match": null,
+    "notes": ""
+  },
+  {
+    "query_id": "tool012",
+    "query": "How do I bake a chocolate cake?",
+    "category": "web_search",
+    "source_query_id": "q038",
+    "expected_tool": "web_search",
+    "actual_tool_called": null,
+    "match": null,
+    "notes": ""
+  },
+  {
+    "query_id": "tool013",
+    "query": "What is the current stock price of Apple?",
+    "category": "web_search",
+    "source_query_id": "q039",
+    "expected_tool": "web_search",
+    "actual_tool_called": null,
+    "match": null,
+    "notes": ""
+  },
+  {
+    "query_id": "tool014",
+    "query": "Who won the FIFA World Cup in 2022?",
+    "category": "web_search",
+    "source_query_id": "q040",
+    "expected_tool": "web_search",
+    "actual_tool_called": null,
+    "match": null,
+    "notes": ""
+  },
+  {
+    "query_id": "tool015",
+    "query": "What is the boiling point of water at sea level?",
+    "category": "web_search",
+    "source_query_id": "q041",
+    "expected_tool": "none",
+    "actual_tool_called": null,
+    "match": null,
+    "notes": ""
+  },
+  {
+    "query_id": "tool016",
+    "query": "How do I file taxes in Germany?",
+    "category": "web_search",
+    "source_query_id": "q042",
+    "expected_tool": "web_search",
+    "actual_tool_called": null,
+    "match": null,
+    "notes": ""
+  },
+  {
+    "query_id": "tool017",
+    "query": "What is the plot of the movie Inception?",
+    "category": "web_search",
+    "source_query_id": "q043",
+    "expected_tool": "web_search",
+    "actual_tool_called": null,
+    "match": null,
+    "notes": ""
+  },
+  {
+    "query_id": "tool018",
+    "query": "How does photosynthesis work in plants?",
+    "category": "web_search",
+    "source_query_id": "q045",
+    "expected_tool": "web_search",
+    "actual_tool_called": null,
+    "match": null,
+    "notes": ""
+  },
+  {
+    "query_id": "tool019",
+    "query": "Who is the current Chancellor of Germany?",
+    "category": "web_search",
+    "source_query_id": null,
+    "expected_tool": "web_search",
+    "actual_tool_called": null,
+    "match": null,
+    "notes": "New query, not in retrieval eval set."
+  },
+  {
+    "query_id": "tool020",
+    "query": "What year did World War II end?",
+    "category": "web_search",
+    "source_query_id": null,
+    "expected_tool": "none",
+    "actual_tool_called": null,
+    "match": null,
+    "notes": "New query, not in retrieval eval set."
+  },
+  {
+    "query_id": "tool021",
+    "query": "What does 'LLM' stand for?",
+    "category": "none",
+    "source_query_id": null,
+    "expected_tool": "none",
+    "actual_tool_called": null,
+    "match": null,
+    "notes": "Borderline: mentions 'LLM' which system prompt lists as a rag_search topic keyword, but doesn't need retrieval to answer. Real ambiguity in prompt design, not a query set error."
+  },
+  {
+    "query_id": "tool022",
+    "query": "What does 'RAG' stand for?",
+    "category": "none",
+    "source_query_id": null,
+    "expected_tool": "none",
+    "actual_tool_called": null,
+    "match": null,
+    "notes": "Same borderline risk as tool021 — 'RAG' is a rag_search keyword in the system prompt."
+  },
+  {
+    "query_id": "tool023",
+    "query": "What is 2 + 2?",
+    "category": "none",
+    "source_query_id": null,
+    "expected_tool": "none",
+    "actual_tool_called": null,
+    "match": null,
+    "notes": ""
+  },
+  {
+    "query_id": "tool024",
+    "query": "What is 15% of 200?",
+    "category": "none",
+    "source_query_id": null,
+    "expected_tool": "none",
+    "actual_tool_called": null,
+    "match": null,
+    "notes": ""
+  },
+  {
+    "query_id": "tool025",
+    "query": "Convert 10 kilometers to miles.",
+    "category": "none",
+    "source_query_id": null,
+    "expected_tool": "none",
+    "actual_tool_called": null,
+    "match": null,
+    "notes": ""
+  },
+  {
+    "query_id": "tool026",
+    "query": "What's the opposite of 'increase'?",
+    "category": "none",
+    "source_query_id": null,
+    "expected_tool": "none",
+    "actual_tool_called": null,
+    "match": null,
+    "notes": ""
+  },
+  {
+    "query_id": "tool027",
+    "query": "Spell the word 'necessary'.",
+    "category": "none",
+    "source_query_id": null,
+    "expected_tool": "none",
+    "actual_tool_called": null,
+    "match": null,
+    "notes": ""
+  },
+  {
+    "query_id": "tool028",
+    "query": "How many days are there in a leap year?",
+    "category": "none",
+    "source_query_id": null,
+    "expected_tool": "none",
+    "actual_tool_called": null,
+    "match": null,
+    "notes": ""
+  },
+  {
+    "query_id": "tool029",
+    "query": "What is the plural of 'analysis'?",
+    "category": "none",
+    "source_query_id": null,
+    "expected_tool": "none",
+    "actual_tool_called": null,
+    "match": null,
+    "notes": ""
+  },
+  {
+    "query_id": "tool030",
+    "query": "Hi, how are you?",
+    "category": "none",
+    "source_query_id": null,
+    "expected_tool": "none",
+    "actual_tool_called": null,
+    "match": null,
+    "notes": ""
+  }
+]

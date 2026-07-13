@@ -1,0 +1,126 @@
+[
+  {
+    "query_id": "q001",
+    "query": "What is the ReAct framework?",
+    "tag": "known_bad_reranker",
+    "research_context": "\n\n[Chunk 1]\nSource: meta_gpt.pdf\nPage: 3\nRerank Score: 0.8688\nRRF Score: 0.0313\nText:\nChen et al., 2018; 2021b; Zhang et al., 2023a; Liu et al., 2023b; Tang et al., 2023a; Muennighoff\net al., 2023). Automatic programming has grown into an industry delivering paid functions such\nas Microsoft Copilot. Lately, LLMs-based agents (Yao et al., 2022; Shinn et al., 2023; Lin et al.,\n2023) have advanced automatic programming development. Among them, ReAct (Yao et al., 2022)\nand Reflexion (Shinn et al., 2023) utilize a chain of thought prompts (Wei et al., 2022) to generate\nreasoning trajectories and action plans with LLMs. Both works demonstrate the effectiveness of\nthe ReAct style loop of reasoning as a design paradigm for empowering automatic programming.\nAdditionally, ToolFormer (Schick et al., 2023) and ToolLLM (Qin et al., 2023) can learn how to use\nexternal tools through simple APIs. The research most closely aligned with our work by Li et al.\n(2023) proposes a straightforward role-play framework for programming that involves communica-\n\n--------------------------------------------------------------------------------\n\n[Chunk 2]\nSource: AutoGen.pdf\nPage: 24\nRerank Score: 0.7288\nRRF Score: 0.0313\nText:\ntask begins and whenever the assistant outputs the same action three times in a row. This ensures the\nassistant takes this commonsense knowledge into consideration and prevents it from getting stuck in\noutputting the same content or constantly apologizing.\nWe compare our system\u2019s performance with ReAct, which treats ALFWorld as a text-completion\ntask. ReAct (Yao et al., 2022) is a few-shot prompting technique that interleaves reasoning and\nacting, allowing for greater synergy between the two and significantly improving performance on\nboth language and decision-making tasks. We integrate ReAct into AutoGen by modifying the\nprompts in a conversational manner. Following ReAct, we employ a two-shot setting. The few-\nshot prompts are obtained from the corresponding repository. As shown in Table 3, the two-agent\n24\n\n--------------------------------------------------------------------------------\n\n[Chunk 3]\nSource: AutoGen.pdf\nPage: 8\nRerank Score: 0.3908\nRRF Score: 0.0145\nText:\nA3: Decision Making in Text World Environments\nIn this subsection, we demonstrate how AutoGen can be used to develop effective applications that\ninvolve interactive or online decision making. We perform the study using the ALFWorld (Shridhar\net al., 2021) benchmark, which includes a diverse collection of synthetic language-based interactive\ndecision-making tasks in household environments.\nWith AutoGen, we implemented a two-agent system to solve tasks from ALFWorld. It consists of\nan LLM-backed assistant agent responsible for suggesting plans to conduct a task and an executor\nagent responsible for executing actions in the ALFWorld environments. This system integrates Re-\nAct prompting (Yao et al., 2022), and is able to achieve similar performance. A common challenge\nencountered in both ReAct and the AutoGen-based two-agent system is their occasional inability to\nleverage basic commonsense knowledge about the physical world. This deficiency can lead to the\n\n--------------------------------------------------------------------------------\n\n[Chunk 4]\nSource: REACT.pdf\nPage: 4\nRerank Score: 0.2908\nRRF Score: 0.0288\nText:\nPublished as a conference paper at ICLR 2023\nappear sparsely in the most relevant positions of a trajectory, so we let the language model decide the\nasynchronous occurrence of thoughts and actions for itself.\nSince decision making and reasoning capabilities are integrated into a large language model, ReAct\nenjoys several unique features: A) Intuitive and easy to design: Designing ReAct prompts is\nstraightforward as human annotators just type down their thoughts in language on top of their actions\ntaken. No ad-hoc format choice, thought design, or example selection is used in this paper. We detail\nprompt design for each task in Sections 3 and 4. B) General and \ufb02exible: Due to the \ufb02exible thought\nspace and thought-action occurrence format, ReAct works for diverse tasks with distinct action\nspaces and reasoning needs, including but not limited to QA, fact veri\ufb01cation, text game, and web\nnavigation. C) Performant and robust: ReAct shows strong generalization to new task instances\n\n--------------------------------------------------------------------------------\n\n[Chunk 5]\nSource: REACT.pdf\nPage: 5\nRerank Score: 0.2512\nRRF Score: 0.0156\nText:\nin ReAct trajectories, loosely resembling how WebGPT (Nakano et al., 2021) interacts with the\nInternet to answer questions, though it operates on a different task and action space, and uses imitation\nand reinforcement learning instead of prompting.\nCombining Internal and External Knowledge\nAs will be detail in Section 3.3, we observe that\nthe problem solving process demonstrated by ReAct is more factual and grounded, whereas CoT\nis more accurate in formulating reasoning structure but can easily suffer from hallucinated facts\nor thoughts. We therefore propose to incorporate ReAct and CoT-SC, and let the model decide\nwhen to switch to the other method based on the following heuristics: A) ReAct \u2192CoT-SC: when\nReAct fails to return an answer within given steps, back off to CoT-SC. We set 7 and 5 steps for\nHotpotQA and FEVER respectively as we \ufb01nd more steps will not improve ReAct performance3.\nB) CoT-SC \u2192ReAct: when the majority answer among n CoT-SC samples occurs less than n/2",
+    "sources": [
+      "meta_gpt.pdf",
+      "AutoGen.pdf",
+      "REACT.pdf"
+    ],
+    "confidence": "medium",
+    "action": "generate_cautiously",
+    "answerable": true,
+    "retrieval_strategy": "dense",
+    "final_answer": "The ReAct framework is a few-shot prompting technique that interleaves reasoning and acting, allowing for greater synergy between the two and significantly improving performance on both language and decision-making tasks. It is designed to be intuitive and easy to use, with a flexible thought space and thought-action occurrence format, making it suitable for diverse tasks with distinct action spaces and reasoning needs. ReAct has been shown to be performant and robust, with strong generalization to new task instances. According to sources meta_gpt.pdf, AutoGen.pdf, and REACT.pdf, ReAct integrates decision making and reasoning capabilities into a large language model, and can be used to develop effective applications that involve interactive or online decision making. Note: Retrieved context had medium/low confidence.",
+    "research_time_sec": 49.21,
+    "writer_time_sec": 0.85,
+    "human_label": null,
+    "human_label_reason": ""
+  },
+  {
+    "query_id": "q008",
+    "query": "What is Retrieval-Augmented Generation?",
+    "tag": "known_bad_sort_bug",
+    "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kpavhmc5e75bxbj3m9etc843` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 98551, Requested 1682. Please try again in 3m21.312s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+    "human_label": null,
+    "human_label_reason": ""
+  },
+  {
+    "query_id": "q029",
+    "query": "How does Phoenix support LLM evaluation and observability?",
+    "tag": "known_bad_corpus_gap",
+    "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kpavhmc5e75bxbj3m9etc843` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99493, Requested 990. Please try again in 6m57.312s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+    "human_label": null,
+    "human_label_reason": ""
+  },
+  {
+    "query_id": "q048",
+    "query": "Describe how persistence works across LangGraph runs.",
+    "tag": "known_bad_unknown",
+    "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kpavhmc5e75bxbj3m9etc843` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99491, Requested 988. Please try again in 6m53.856s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+    "human_label": null,
+    "human_label_reason": ""
+  },
+  {
+    "query_id": "q003",
+    "query": "Compare ReAct and Reflexion approaches to agent reasoning.",
+    "tag": "untested",
+    "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kpavhmc5e75bxbj3m9etc843` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99488, Requested 990. Please try again in 6m52.992s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+    "human_label": null,
+    "human_label_reason": ""
+  },
+  {
+    "query_id": "q013",
+    "query": "Why does the 'lost in the middle' problem occur in long-context LLMs?",
+    "tag": "untested",
+    "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kpavhmc5e75bxbj3m9etc843` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99486, Requested 997. Please try again in 6m57.312s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+    "human_label": null,
+    "human_label_reason": ""
+  },
+  {
+    "query_id": "q022",
+    "query": "Compare AutoGen and CAMEL approaches to multi-agent orchestration.",
+    "tag": "untested",
+    "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kpavhmc5e75bxbj3m9etc843` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99484, Requested 993. Please try again in 6m52.128s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+    "human_label": null,
+    "human_label_reason": ""
+  },
+  {
+    "query_id": "q025",
+    "query": "What is LoRA and how does it enable parameter-efficient fine-tuning?",
+    "tag": "untested",
+    "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kpavhmc5e75bxbj3m9etc843` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99481, Requested 994. Please try again in 6m50.4s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+    "human_label": null,
+    "human_label_reason": ""
+  },
+  {
+    "query_id": "q028",
+    "query": "What is RAGAS and what does it measure?",
+    "tag": "untested",
+    "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kpavhmc5e75bxbj3m9etc843` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99479, Requested 990. Please try again in 6m45.215999999s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+    "human_label": null,
+    "human_label_reason": ""
+  },
+  {
+    "query_id": "q035",
+    "query": "How does speculative decoding speed up LLM inference?",
+    "tag": "untested",
+    "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kpavhmc5e75bxbj3m9etc843` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99476, Requested 989. Please try again in 6m41.76s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+    "human_label": null,
+    "human_label_reason": ""
+  },
+  {
+    "query_id": "q046",
+    "query": "What is LangGraph and what problem does it solve?",
+    "tag": "untested",
+    "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kpavhmc5e75bxbj3m9etc843` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99474, Requested 990. Please try again in 6m40.896s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+    "human_label": null,
+    "human_label_reason": ""
+  },
+  {
+    "query_id": "q017",
+    "query": "Who proposed the transformer architecture in 'Attention Is All You Need'?",
+    "tag": "ambiguous_domain_gate",
+    "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kpavhmc5e75bxbj3m9etc843` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99472, Requested 992. Please try again in 6m40.896s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+    "human_label": null,
+    "human_label_reason": ""
+  },
+  {
+    "query_id": "q037",
+    "query": "What is the capital of France?",
+    "tag": "ood",
+    "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kpavhmc5e75bxbj3m9etc843` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99469, Requested 772. Please try again in 3m28.224s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+    "human_label": null,
+    "human_label_reason": ""
+  },
+  {
+    "query_id": "q043",
+    "query": "What is the plot of the movie Inception?",
+    "tag": "ood",
+    "error": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kpavhmc5e75bxbj3m9etc843` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99467, Requested 989. Please try again in 6m33.984s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+    "human_label": null,
+    "human_label_reason": ""
+  }
+]
