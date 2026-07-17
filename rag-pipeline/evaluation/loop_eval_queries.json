@@ -1,0 +1,17 @@
+[
+  {"query_id": "q001", "query": "What is the ReAct framework?", "tag": "known_bad", "known_issue": "reranker_calibration"},
+  {"query_id": "q008", "query": "What is Retrieval-Augmented Generation?", "tag": "known_bad", "known_issue": "sort_bug"},
+  {"query_id": "q029", "query": "How does Phoenix support LLM evaluation and observability?", "tag": "known_bad", "known_issue": "corpus_gap"},
+  {"query_id": "q048", "query": "Describe how persistence works across LangGraph runs.", "tag": "known_bad", "known_issue": "uninvestigated"},
+
+  {"query_id": "q034", "query": "What is PagedAttention and how does it optimize memory in vLLM?", "tag": "should_pass_first_try"},
+  {"query_id": "q047", "query": "How do checkpointers work in LangGraph?", "tag": "should_pass_first_try"},
+  {"query_id": "q050", "query": "What is memory in LangGraph and how is it implemented?", "tag": "should_pass_first_try"},
+
+  {"query_id": "q038", "query": "How do I bake a chocolate cake?", "tag": "ood"},
+  {"query_id": "q045", "query": "How does photosynthesis work in plants?", "tag": "ood"},
+
+  {"query_id": "q018", "query": "What is AutoGen and how does it support multi-agent conversations?", "tag": "retry_candidate", "folder": "multi_agent"},
+  {"query_id": "q030", "query": "What is RAGOps and how does it differ from traditional MLOps?", "tag": "retry_candidate", "folder": "llmops"},
+  {"query_id": "q051", "query": "How do you use subgraphs in LangGraph?", "tag": "retry_candidate", "folder": "langgraph"}
+]
