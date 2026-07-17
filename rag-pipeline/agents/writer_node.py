@@ -74,6 +74,24 @@ def writer_node(state: MultiAgentState, config: Optional[RunnableConfig] = None)
     answerable = state.get("answerable", False)
     action = state.get("action", "retry_or_abstain")
     sources = state.get("sources", [])
+    source_type = state.get("source_type", "rag")
+
+    # NEW hard gate — must come FIRST, before the other gates below.
+    # When source_type is "general_knowledge", research_node already set
+    # final_answer directly (the ReAct agent answered with no tool call,
+    # so there's no context to write from). Writing it "from context"
+    # here would be pointless — the answer already exists. Just pass it
+    # through unchanged, no LLM call needed.
+    if source_type == "general_knowledge":
+        node_latency_ms = round((time.time() - node_start) * 1000, 2)
+        return {
+            "final_answer": state.get("final_answer", ""),
+            "node_latencies": {"writer_node": node_latency_ms},
+            "agent_log": [
+                f"[WriterAgent] Skipped — source_type: general_knowledge, "
+                f"passing through answer unchanged | Latency: {node_latency_ms}ms"
+            ],
+        }
 
     # Hard gates — unchanged
     if not answerable:
@@ -189,6 +207,8 @@ if __name__ == "__main__":
         "final_answer": "",
         "answer_grounded": False,
         "retry_count": 0,
+        "abstained": False,
+        "source_type": "rag",
         "node_latencies": {},
         "agent_log": []
     }

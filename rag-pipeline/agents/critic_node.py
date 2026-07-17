@@ -23,17 +23,38 @@ llm = ChatGroq(model="llama-3.3-70b-versatile")
 # -----------------------------------------------------------------------
 # System Prompt
 # -----------------------------------------------------------------------
-CRITIC_SYSTEM_PROMPT = """You are a strict answer grounding critic.
+CRITIC_SYSTEM_PROMPT = """You are a grounding critic. Your job is to catch fabricated or 
+misattributed claims — NOT to demand exact wording matches.
 
 Your job is to check whether a given answer is grounded in the provided research context.
 
 Rules:
 1. Read the query, the final answer, and the research context carefully
-2. Check every claim in the final answer against the research context
-3. If ALL claims are directly supported by the context, set answer_grounded to true
-4. If ANY claim cannot be traced back to the context — even minor connecting language or assumptions — set answer_grounded to false
-5. Write a critique explaining your decision — be specific about which claims are grounded or not
-6. Do NOT infer or assume. If the exact claim is not present verbatim or near-verbatim in the context, mark it as ungrounded.
+2. Check every factual claim in the final answer against the research context
+3. A claim is GROUNDED if the underlying fact appears in the context — even if:
+   - it's paraphrased or reworded differently than the context
+   - it's assembled by combining facts from two or more separate chunks
+   - it's a reasonable, direct restatement of what the context says
+4. A claim is UNGROUNDED only if:
+   - the fact does not appear anywhere in the context (fabrication), OR
+   - the claim attributes information to the wrong entity/topic (e.g. describing 
+     a different "Phoenix" than the one the context is actually about), OR
+   - the claim states a specific detail (a number, name, date, or mechanism) that 
+     contradicts or is absent from the context
+4b. Before treating any chunk as support for a claim about a specific named entity 
+    (a tool, model, method, framework, or product), verify that the chunk actually 
+    names or clearly refers to that same entity. A chunk discussing the same general 
+    subject area, without naming the specific entity the claim is about, does NOT 
+    count as support — this is misattribution, not synthesis. If two different things 
+    happen to share a name, check what the chunk's actual subject is, not just 
+    whether a label or keyword matches.
+5. Do NOT penalize a claim just because it uses different words than the context, 
+   or because it connects information from multiple chunks — that is normal synthesis, 
+   not a grounding failure
+6. Set answer_grounded to true only if every claim passes the GROUNDED test in rule 3/4. 
+   If even one claim is fabricated or misattributed, set answer_grounded to false
+7. Write a critique explaining your decision — be specific about which claims are 
+   grounded or not, and WHY (fabricated vs. misattributed vs. genuinely unsupported)
 
 Respond ONLY with this exact JSON format, no other text, no markdown:
 {"answer_grounded": true or false, "critique": "your explanation here"}"""
@@ -54,6 +75,31 @@ def critic_node(state: MultiAgentState) -> dict:
     query = state["query"]
     final_answer = state.get("final_answer", "")
     research_context = state.get("research_context", "")
+    source_type = state.get("source_type", "rag")
+
+    # NEW hard gate — must come FIRST. When source_type is
+    # "general_knowledge", there is no research_context to check
+    # grounding against — the question "is this grounded in the
+    # context" is meaningless here, not just hard. Rather than asking
+    # the LLM to fake-check something that doesn't apply (which is what
+    # produced the false "grounded in research context" verdict on the
+    # cake/photosynthesis queries), we label it honestly instead.
+    if source_type == "general_knowledge":
+        node_latency_ms = round((time.time() - node_start) * 1000, 2)
+        return {
+            "answer_grounded": True,   # not rejected — just not a grounding
+                                        # question in the first place
+            "critique": (
+                "Not applicable — no retrieval was performed. This answer "
+                "was sourced directly from the model's own general "
+                "knowledge, not verified against any retrieved context."
+            ),
+            "node_latencies": {"critic_node": node_latency_ms},
+            "agent_log": [
+                f"[CriticAgent] Skipped grounding check — source_type: "
+                f"general_knowledge | Latency: {node_latency_ms}ms"
+            ],
+        }
 
     # Hard gate — nothing to critique if writer produced no answer
     if not final_answer:
@@ -141,6 +187,8 @@ if __name__ == "__main__":
         "critique": "",
         "answer_grounded": False,
         "retry_count": 0,
+        "abstained": False,
+        "source_type": "rag",
         "node_latencies": {},
         "agent_log": []
     })
