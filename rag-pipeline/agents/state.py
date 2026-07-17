@@ -25,12 +25,16 @@ class MultiAgentState(TypedDict):
     action: str            # "generate", "generate_cautiously", "retry_or_abstain"
     answerable: bool
     retrieval_strategy: str
+    source_type: str       # "rag", "web_search", or "general_knowledge" —
+                            # tells writer/critic whether real external
+                            # content exists to check the answer against
 
     # Writer/Critic Agent output
     critique: str
     final_answer: str
     answer_grounded: bool
     retry_count:int
+    abstained: bool        # True only if abstain_node overwrote final_answer
 
     # Observability — appends across agents, never overwrites
     agent_log: Annotated[list[str], operator.add]
