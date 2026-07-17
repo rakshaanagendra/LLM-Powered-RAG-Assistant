@@ -10,6 +10,8 @@ Distinguishes two failure types:
 - false_positive: critic said ungrounded, human said good -> wasted retry, not dangerous
 
 """
+from dotenv import load_dotenv
+load_dotenv()  # load environment variables from .env file
 
 import json
 import sys
@@ -22,16 +24,41 @@ PIPELINE_ROOT = Path(__file__).resolve().parent.parent
 if str(PIPELINE_ROOT) not in sys.path:
     sys.path.insert(0, str(PIPELINE_ROOT))
 
+from groq import BadRequestError
 from agents.critic_node import critic_node
 from agents.state import MultiAgentState
 
-INPUT_PATH = Path("critic_eval_inputs.json")
-OUTPUT_PATH = Path("critic_eval_results.json")
+candidates = sorted(Path(".").glob("critic_eval_inputs_*.json"))
+if not candidates:
+    raise FileNotFoundError("No critic_eval_inputs_*.json file found in this directory.")
+INPUT_PATH = candidates[-1]
+print(f"Using input file: {INPUT_PATH}")
+
+MAX_ATTEMPTS = 2
 
 
 def label_to_expected_grounded(human_label: str) -> bool:
     """'good' -> critic should say grounded=True. 'bad' -> critic should say grounded=False."""
     return human_label == "good"
+
+
+def critic_node_with_retry(state: MultiAgentState) -> dict:
+    """
+    Same retry pattern as research_node_with_retry in generate_critic_eval_inputs.py.
+    critic_node runs on the same Groq model (llama-3.3-70b-versatile) that
+    intermittently emits malformed tool-call syntax. Retrying the same input
+    once is usually enough for it to succeed on the 2nd attempt.
+    """
+    last_error: BadRequestError | None = None
+    for attempt in range(1, MAX_ATTEMPTS + 1):
+        try:
+            return critic_node(state)
+        except BadRequestError as e:
+            last_error = e
+            print(f"    Attempt {attempt}/{MAX_ATTEMPTS} failed: tool_use_failed. Retrying...")
+            time.sleep(2)
+    assert last_error is not None
+    raise last_error
 
 
 def run_one(record: dict) -> dict:
@@ -47,11 +74,12 @@ def run_one(record: dict) -> dict:
         "final_answer": record.get("final_answer", ""),
         "answer_grounded": False,
         "retry_count": 0,
+        "abstained": False,
         "agent_log": [],
         "node_latencies": {},
     }
 
-    result = critic_node(state)
+    result = critic_node_with_retry(state)
     predicted_grounded = result["answer_grounded"]
     expected_grounded = label_to_expected_grounded(record["human_label"])
 
@@ -119,12 +147,15 @@ def main():
         "false_positive_query_ids": [r["query_id"] for r in false_positives],
     }
 
+    timestamp = time.strftime("%Y%m%d_%H%M%S")
+    output_path = Path(f"critic_eval_results_{timestamp}.json")
+
     output = {"summary": summary, "results": results}
-    OUTPUT_PATH.write_text(json.dumps(output, indent=2))
+    output_path.write_text(json.dumps(output, indent=2))
 
     print("\n=== Critic Eval Summary ===")
     print(json.dumps(summary, indent=2))
-    print(f"\nFull results saved to {OUTPUT_PATH.resolve()}")
+    print(f"\nFull results saved to {output_path.resolve()}")
 
 
 if __name__ == "__main__":

@@ -12,6 +12,7 @@ Run this from wherever research_node.py and writer_node.py already
 import correctly in your repo (same place you run rag_agent.py from).
 """
 
+import argparse
 import json
 import sys
 import time
@@ -28,7 +29,7 @@ from agents.research_node import research_node
 from agents.writer_node import writer_node
 from agents.state import MultiAgentState
 
-MAX_ATTEMPTS = 2
+MAX_ATTEMPTS = 3
 
 
 def research_node_with_retry(state: MultiAgentState) -> dict:
@@ -128,8 +129,25 @@ def run_pipeline_for_query(query_id: str, query: str, tag: str) -> dict:
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--query-ids",
+        type=str,
+        default=None,
+        help="Comma-separated query_ids to run (e.g. q022,q043). Defaults to all queries.",
+    )
+    args = parser.parse_args()
+
+    queries = QUERIES
+    if args.query_ids:
+        wanted = {qid.strip() for qid in args.query_ids.split(",")}
+        queries = [item for item in QUERIES if item["query_id"] in wanted]
+        missing = wanted - {item["query_id"] for item in queries}
+        if missing:
+            raise ValueError(f"Unknown query_id(s): {', '.join(sorted(missing))}")
+
     results = []
-    for item in QUERIES:
+    for item in queries:
         print(f"Running {item['query_id']}: {item['query']}")
         try:
             record = run_pipeline_for_query(item["query_id"], item["query"], item["tag"])
@@ -146,7 +164,8 @@ def main():
         results.append(record)
         time.sleep(2)  # Groq free-tier rate limit spacing, same as your other eval runners
 
-    out_path = Path("critic_eval_inputs.json")
+    timestamp = time.strftime("%Y%m%d_%H%M%S")
+    out_path = Path(f"critic_eval_inputs_{timestamp}.json")
     out_path.write_text(json.dumps(results, indent=2))
     print(f"\nSaved {len(results)} records to {out_path.resolve()}")
 

@@ -4,6 +4,7 @@ from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode, tools_condition
 from langchain_groq import ChatGroq # for deployment as Ollama does not support fre cloud servers as RAM is low
+from groq import BadRequestError
 import sys
 from pathlib import Path
 from langgraph.checkpoint.memory import MemorySaver
@@ -75,10 +76,27 @@ SYSTEM_PROMPT = """You are a research assistant with access to two tools:
 4. Always cite sources in your answer.
 """
 
+MAX_TOOL_CALL_RETRIES = 2
+
 def llm_node(state: AgentState) -> AgentState:
     """LLM reasons and decides whether to call a tool or answer directly."""
     messages = [SystemMessage(content=SYSTEM_PROMPT)] + state["messages"]
-    response = llm_with_tools.invoke(messages)
+
+    for _ in range(MAX_TOOL_CALL_RETRIES):
+        try:
+            response = llm_with_tools.invoke(messages)
+            return {"messages": [response]}
+        except BadRequestError as e:
+            body = e.body if isinstance(e.body, dict) else {}
+            if body.get("error", {}).get("code") != "tool_use_failed":
+                raise
+            # Groq/Llama occasionally emits a malformed tool-call instead of
+            # a structured one — a stochastic decoding glitch, not a content
+            # failure, so retrying the same messages usually succeeds.
+
+    # Retries exhausted — fall back to a direct answer with no tool access
+    # rather than crashing the graph.
+    response = llm.invoke(messages)
     return {"messages": [response]}
 # ToolNode handles tool execution automatically
 # It reads the tool call from the last LLM message,
